@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1646705165 source:d:\nice\codegame\codegametest.cpp
+	<iostream>
+	<SDL.h>
+
+1646705829 source:d:\nice\codegame\test2.cpp
+	<iostream>
+
