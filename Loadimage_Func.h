@@ -6,12 +6,14 @@
 #include <SDL_image.h>
 #include <string>
 #include <SDL_ttf.h>
+#include <time.h>
 
 using namespace std;
 
 const int screen_width = 1200;
 const int screen_height = 690;
 const int MAX = 44;
+const int enemy_numb = 5;
 
 
 class Game {

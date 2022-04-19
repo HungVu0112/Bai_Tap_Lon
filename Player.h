@@ -2,8 +2,6 @@
 #define PLEYER_H
 
 #include "Loadimage_Func.h"
-#include "Bullets.h"
-#include <vector>
 
 class Player {
 private:
@@ -13,8 +11,6 @@ private:
 
 	int posX, posY;
 	int velX, velY;
-
-	vector <Bullets*> bullet_list;
 public:
 	const int player_vel = 7;
 
@@ -29,11 +25,11 @@ public:
 
 	void free();
 
-	int getWidth_();
-	int getHeight_();
+	int getWidth_() { return width_; }
+	int getHeight_() { return height_; }
 
-	void setbulletlist(vector <Bullets*> bullet_list_) { bullet_list = bullet_list_; }
-	vector<Bullets*> getBulletlist() const { return bullet_list; }
+	int getX() { return posX; }
+	int getY() { return posY; }
 };
 
 #endif

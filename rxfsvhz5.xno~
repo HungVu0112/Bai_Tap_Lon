@@ -1,5 +1,6 @@
 #include "Loadimage_Func.h"
 #include "Player.h"
+#include "Bullets.h"
 #include "Enemy.h"
 
 int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, - 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3 };
@@ -33,10 +34,11 @@ void changeBackGround2();
 ////////////////////////////////////////////////////
 Player player_, Round1BackGround, Lives;
 int BackGround_Speed = 0, BackGround_width = 6131;
+void Bullet_fired();
 ////////////////////////////////////////////////////
 Enemy *enemy_ = new Enemy[e_numb];
 void e_show();
-bool checkCollision(Player& player_, Enemy* enemy);
+bool checkCollision(SDL_Rect a, SDL_Rect b);
 
 int main(int argc, char* args[]) {
 	srand(time(0));
@@ -79,6 +81,7 @@ int main(int argc, char* args[]) {
 					
 					Lives.render_(50, 20, NULL, renderer);
 					player_.renderPlayer(NULL, renderer);
+					Bullet_fired();
 					e_show();
 
 					SDL_RenderPresent(renderer);
@@ -295,98 +298,36 @@ void changeBackGround2() {
 	flag++;
 }
 
+void Bullet_fired() {
+	for (int i = 0; i < player_.getBulletlist().size(); i++) {
+		vector<Bullets*> _bullet_list_ = player_.getBulletlist();
+		Bullets* bullet_ = _bullet_list_.at(i);
+		if (bullet_ != NULL) {
+			if (bullet_->get_is_move()) {
+				bullet_->render(NULL, renderer);
+				bullet_->move_B(screen_width, screen_height);
+			}
+			else {
+				if (bullet_ != NULL) {
+					_bullet_list_.erase(_bullet_list_.begin() + i);
+					player_.setbulletlist(_bullet_list_);
+
+					delete bullet_;
+					bullet_ = NULL;
+				}
+			}
+		}
+	}
+}
+
 void e_show() {
 	for (int i = 0; i < e_numb; i++) {
 		Enemy* enemy__ = (enemy_ + i);
-		if (enemy__ != NULL) {
-			enemy__->HandleMove_e(screen_width, screen_height);
-			enemy__->render_e(NULL, renderer);
-		}
+		enemy__->render_e(NULL, renderer);
+		enemy__->HandleMove_e(screen_width, screen_height);
 	}
 }
 
-bool checkCollision(Player& player_, Enemy* enemy_) {
-	int left_a = player_.getX();
-	int right_a = player_.getX() + 20;
-	int top_a = player_.getY();
-	int bottom_a = player_.getY() + 40;
-
-	int left_b = enemy_->getX();
-	int right_b = enemy_->getX() + 100;
-	int top_b = enemy_->getY();
-	int bottom_b = enemy_->getY() + 47;
-
-	if (left_a > left_b && left_a < right_b)
-	{
-		if (top_a > top_b && top_a < bottom_b)
-		{
-			return true;
-		}
-	}
-
-	if (left_a > left_b && left_a < right_b)
-	{
-		if (bottom_a > top_b && bottom_a < bottom_b)
-		{
-			return true;
-		}
-	}
-
-	if (right_a > left_b && right_a < right_b)
-	{
-		if (top_a > top_b && top_a < bottom_b)
-		{
-			return true;
-		}
-	}
-
-	if (right_a > left_b && right_a < right_b)
-	{
-		if (bottom_a > top_b && bottom_a < bottom_b)
-		{
-			return true;
-		}
-	}
-
-	if (left_b > left_a && left_b < right_a)
-	{
-		if (top_b > top_a && top_b < bottom_a)
-		{
-			return true;
-		}
-	}
-
-	if (left_b > left_a && left_b < right_a)
-	{
-		if (bottom_b > top_a && bottom_b < bottom_a)
-		{
-			return true;
-		}
-	}
-
-	if (right_b > left_a && right_b < right_a)
-	{
-		if (top_b > top_a && top_b < bottom_a)
-		{
-			return true;
-		}
-	}
-
-	if (right_b > left_a && right_b < right_a)
-	{
-		if (bottom_b > top_a && bottom_b < bottom_a)
-		{
-			return true;
-		}
-	}
-
-	if (top_a == top_b && right_a == right_b && bottom_a == bottom_b)
-	{
-		return true;
-	}
-
-	return false;
-}
 
 
 

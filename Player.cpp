@@ -50,13 +50,6 @@ void Player::handleMove(SDL_Event& e, SDL_Renderer* renderer) {
 		case SDLK_LEFT: velX += player_vel; break;
 		}
 	}
-	if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE && e.key.repeat == 0) {
-		Bullets* bullet = new Bullets();
-		bullet->loadFromFile_B("Images/bullet.png", renderer);
-		bullet->setPOS(posX, posY);
-		bullet->set_is_move(true);
-		bullet_list.push_back(bullet);
-	}
 }
 
 void Player::move(Player& player_) {
@@ -100,10 +93,3 @@ void Player::free() {
 	}
 }
 
-int Player::getWidth_() {
-	return width_;
-}
-
-int Player::getHeight_() {
-	return height_;
-}
