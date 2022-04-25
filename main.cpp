@@ -6,7 +6,7 @@ int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
-int e_numb = 6;
+int e_numb = 5;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -22,8 +22,8 @@ int menutext1_X = 100, menutext1_Y = 100;
 int menutext2_X = 150, menutext2_Y = 400;
 bool checkChangeMenu = false;
 void changeBackGround1();
-//////////////////////////////////////////////////////////////////////////////////////
-Game control_, controltext, livestext, control, heart, dots, changePoint, Roundtext;
+//////////////////////////////////////////////////////////////////////////////////////////////
+Game control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign;
 Uint8 b = 255;
 int controltext_X = 190, controltext_Y = 200;
 int livestext_X = 750, livestext_Y = 200;
@@ -31,12 +31,18 @@ int changepoint_X = 1100, changepoint_Y = 630;
 bool checkClicked = false;
 void changeBackGround2();
 ////////////////////////////////////////////////////
-Player player_, Round1BackGround, Lives;
+Player player_, Round1BackGround, Lives, pro_t;
 int BackGround_Speed = 0, BackGround_width = 6131;
 ////////////////////////////////////////////////////
 Enemy *enemy_ = new Enemy[e_numb];
 void e_show();
 bool checkCollision(Player& player_, Enemy* enemy);
+stringstream Lives_Remain;
+bool check_l = false;
+int lives_r = 3, Delay_d = 30;
+void check_live();
+
+int save = 0;
 
 int main(int argc, char* args[]) {
 	srand(time(0));
@@ -64,7 +70,7 @@ int main(int argc, char* args[]) {
 			// Control Guide
 			if (checkChangeMenu) {
 				if (flag == 0) changeBackGround1();
-
+				// Game Play
 				if (checkClicked) {
 					if (flag == 1) changeBackGround2();
 
@@ -80,6 +86,12 @@ int main(int argc, char* args[]) {
 					Lives.render_(50, 20, NULL, renderer);
 					player_.renderPlayer(NULL, renderer);
 					e_show();
+					check_live();
+
+					if (save == 240) {
+						check_l = false;
+						save = 0;
+					}
 
 					SDL_RenderPresent(renderer);
 
@@ -238,6 +250,16 @@ bool loadBackGround() {
 		return false;
 	}
 
+	if (!pro_t.loadFromFile_("Images/protection.png", renderer)) {
+		cout << "Could not load protection texture ! " << endl;
+		return false;
+	}
+
+	if (!pro_sign.loadFromFile("Images/pro_sign.png", renderer)) {
+		cout << "Could not load sign ! " << endl;
+		return false;
+	}
+
 	SDL_Color Roundtext_Color = { 160, 214, 230 };
 	if (!Roundtext.loadFromText("Round 1", "Images/lazy2.ttf", Roundtext_Color, 150, renderer)) {
 		cout << "Could not load ROUND text ! " << endl;
@@ -251,7 +273,7 @@ bool loadBackGround() {
 	for (int i = 0; i < e_numb; i++) {
 		Enemy* enemy__ = (enemy_ + i);
 		enemy__->loadFromFile_e("Images/icespike1.png", renderer);
-		enemy__->setPos_x(i*400);
+		enemy__->setPos_x(i*200);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,20 +323,24 @@ void e_show() {
 		if (enemy__ != NULL) {
 			enemy__->HandleMove_e(screen_width, screen_height);
 			enemy__->render_e(NULL, renderer);
+			if (checkCollision(player_, enemy__)) {
+				check_l = true;
+				enemy__->re_L(screen_width);
+			}
 		}
 	}
 }
 
 bool checkCollision(Player& player_, Enemy* enemy_) {
 	int left_a = player_.getX();
-	int right_a = player_.getX() + 20;
+	int right_a = player_.getX() + player_.getWidth_();
 	int top_a = player_.getY();
-	int bottom_a = player_.getY() + 40;
+	int bottom_a = player_.getY() + player_.getHeight_();
 
 	int left_b = enemy_->getX();
-	int right_b = enemy_->getX() + 100;
+	int right_b = enemy_->getX() + enemy_->getWidth_e();
 	int top_b = enemy_->getY();
-	int bottom_b = enemy_->getY() + 47;
+	int bottom_b = enemy_->getY() + enemy_->getHeight_e();
 
 	if (left_a > left_b && left_a < right_b)
 	{
@@ -388,5 +414,23 @@ bool checkCollision(Player& player_, Enemy* enemy_) {
 	return false;
 }
 
+void check_live() {
+	if (check_l) {
+		if (save == 0) {
+			player_.re_l();
+			lives_r--;
+		}
+		pro_sign.render(150, 15, NULL, renderer);
+		pro_t.renderPro_(player_, NULL, renderer);
+		save++;
+	}
 
+	Lives_Remain.str("");
+	Lives_Remain << lives_r;
+	SDL_Color l_Color = { 188, 160, 194 };
+	if (!Live_re.loadFromText(Lives_Remain.str().c_str(), "Images/lazy2.ttf", l_Color, 30, renderer)) {
+		cout << "Could not load live remain ! " << endl;
+	}
 
+	Live_re.render(120, 30, NULL, renderer);
+}

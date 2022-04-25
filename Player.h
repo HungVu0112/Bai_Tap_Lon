@@ -12,7 +12,7 @@ private:
 	int posX, posY;
 	int velX, velY;
 public:
-	const int player_vel = 7;
+	const int player_vel = 10;
 
 	Player();
 
@@ -22,6 +22,7 @@ public:
 	void render_(int x, int y, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
 	
 	void renderPlayer(SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
+	void renderPro_(Player& player_, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
 
 	void free();
 
@@ -30,6 +31,8 @@ public:
 
 	int getX() { return posX; }
 	int getY() { return posY; }
+
+	void re_l();
 };
 
 #endif

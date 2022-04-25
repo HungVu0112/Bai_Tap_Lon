@@ -7,6 +7,7 @@
 #include <string>
 #include <SDL_ttf.h>
 #include <time.h>
+#include <sstream>
 
 using namespace std;
 

@@ -1,5 +1,3 @@
 ﻿  main.cpp
-D:\Thư mục mới (2)\Game\Game\main.cpp(42,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  Player.cpp
-  Generating Code...
+D:\Thư mục mới (2)\Game\Game\main.cpp(48,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   Game.vcxproj -> D:\Thư mục mới (2)\Game\x64\Debug\Game.exe
