@@ -2,19 +2,20 @@
 #include "Player.h"
 #include "Enemy.h"
 
-int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, - 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3 };
+int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3 };
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
 int e_numb = 5;
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int save = 0;
+/////////////////////////////////////////////////////////////////////////////////////////
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 TTF_Font* font = NULL;
 /////////////////////////////////////
 bool initSDL();
-bool loadBackGround(); 
-void close();
+bool loadBackGround();
+void close();           
 ////////////////////////////////////////////////
 Game menu, menutext1, menutext2, menutext3;
 Uint8 a = 255;
@@ -34,15 +35,18 @@ void changeBackGround2();
 Player player_, Round1BackGround, Lives, pro_t;
 int BackGround_Speed = 0, BackGround_width = 6131;
 ////////////////////////////////////////////////////
-Enemy *enemy_ = new Enemy[e_numb];
+Enemy* enemy_ = new Enemy[e_numb];
 void e_show();
 bool checkCollision(Player& player_, Enemy* enemy);
 stringstream Lives_Remain;
 bool check_l = false;
-int lives_r = 3, Delay_d = 30;
+int lives_r = 5, Delay_d = 30;
 void check_live();
-
-int save = 0;
+////////////////    GAME SETUP   /////////////////////////
+void menu_display();
+void control_display();
+void Round1_display();
+//////////////////////////////////////////////////////////
 
 int main(int argc, char* args[]) {
 	srand(time(0));
@@ -58,12 +62,12 @@ int main(int argc, char* args[]) {
 		while (!quit) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) quit = true;
-				if(flag == 0) menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu);
+				if (flag == 0) menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu);
 				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked);
 				player_.handleMove(e, renderer);
 
 			}
-			
+
 			SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
 			SDL_RenderClear(renderer);
 
@@ -73,61 +77,15 @@ int main(int argc, char* args[]) {
 				// Game Play
 				if (checkClicked) {
 					if (flag == 1) changeBackGround2();
-
-					player_.move(player_);
-					Round1BackGround.render_(BackGround_Speed, 0, NULL, renderer);
-					
-					while (DelayTime > 0) {
-						Roundtext.render(350, 250, NULL, renderer);
-						SDL_RenderPresent(renderer);
-						DelayTime--;
-					}
-					
-					Lives.render_(50, 20, NULL, renderer);
-					player_.renderPlayer(NULL, renderer);
-					e_show();
-					check_live();
-
-					if (save == 240) {
-						check_l = false;
-						save = 0;
-					}
-
-					SDL_RenderPresent(renderer);
-
-					if (-BackGround_Speed >= BackGround_width) BackGround_Speed = -BackGround_width;
-					else BackGround_Speed -= 2;
-
-
+					Round1_display();
 				}
 				else {
-					control_.render(0, 0, NULL, renderer);
-					controltext.render(controltext_X, controltext_Y, NULL, renderer);
-					control.render(250, 350, NULL, renderer);
-					livestext.render(livestext_X, livestext_Y, NULL, renderer);
-					heart.render(800, 360, NULL, renderer);
-					dots.render(910, 600, NULL, renderer);
-					changePoint.render(changepoint_X, changepoint_Y, NULL, renderer);
-					SDL_RenderPresent(renderer);
-
-					controltext_X -= Delay[index]; controltext_Y += Delay[index];
-					livestext_X -= Delay[index]; livestext_Y += Delay[index];
-					if (index == (MAX - 1)) index = 0;
-					else index++;
+					control_display();
 				}
 			}
 			else {
 				// Menu Background
-				menu.render(0, 0, NULL, renderer);
-				menutext1.render(menutext1_X, menutext1_Y, NULL, renderer);
-				menutext2.render(menutext2_X, menutext2_Y, NULL, renderer);
-
-				SDL_RenderPresent(renderer);
-
-				menutext1_X -= Delay[index];
-				menutext1_Y += Delay[index];
-				if (index == (MAX - 1)) index = 0;
-				else index++;
+				menu_display();
 			}
 		}
 	}
@@ -166,7 +124,7 @@ bool initSDL() {
 }
 
 bool loadBackGround() {
-	
+
 	// Menu background
 	if (!menu.loadFromFile("Images/menutex.png", renderer)) {
 		cout << "Could not load menu texture ! " << endl;
@@ -189,7 +147,7 @@ bool loadBackGround() {
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	// Control Guide background
 	if (!control_.loadFromFile("Images/control.png", renderer)) {
 		cout << "Could not load control background ! " << endl;
@@ -265,7 +223,7 @@ bool loadBackGround() {
 		cout << "Could not load ROUND text ! " << endl;
 		return false;
 	}
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -273,7 +231,7 @@ bool loadBackGround() {
 	for (int i = 0; i < e_numb; i++) {
 		Enemy* enemy__ = (enemy_ + i);
 		enemy__->loadFromFile_e("Images/icespike1.png", renderer);
-		enemy__->setPos_x(i*200);
+		enemy__->setPos_x(i * 200);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,6 +249,61 @@ void close() {
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
+}
+
+void menu_display() {
+	menu.render(0, 0, NULL, renderer);
+	menutext1.render(menutext1_X, menutext1_Y, NULL, renderer);
+	menutext2.render(menutext2_X, menutext2_Y, NULL, renderer);
+
+	SDL_RenderPresent(renderer);
+
+	menutext1_X -= Delay[index];
+	menutext1_Y += Delay[index];
+	if (index == (MAX - 1)) index = 0;
+	else index++;
+}
+
+void control_display() {
+	control_.render(0, 0, NULL, renderer);
+	controltext.render(controltext_X, controltext_Y, NULL, renderer);
+	control.render(250, 350, NULL, renderer);
+	livestext.render(livestext_X, livestext_Y, NULL, renderer);
+	heart.render(800, 360, NULL, renderer);
+	dots.render(910, 600, NULL, renderer);
+	changePoint.render(changepoint_X, changepoint_Y, NULL, renderer);
+	SDL_RenderPresent(renderer);
+
+	controltext_X -= Delay[index]; controltext_Y += Delay[index];
+	livestext_X -= Delay[index]; livestext_Y += Delay[index];
+	if (index == (MAX - 1)) index = 0;
+	else index++;
+}
+
+void Round1_display() {
+	player_.move(player_);
+	Round1BackGround.render_(BackGround_Speed, 0, NULL, renderer);
+
+	while (DelayTime > 0) {
+		Roundtext.render(350, 250, NULL, renderer);
+		SDL_RenderPresent(renderer);
+		DelayTime--;
+	}
+
+	Lives.render_(50, 20, NULL, renderer);
+	player_.renderPlayer(NULL, renderer);
+	if (-BackGround_Speed < BackGround_width) e_show();
+	check_live();
+
+	if (save == 240) {
+		check_l = false;
+		save = 0;
+	}
+
+	SDL_RenderPresent(renderer);
+
+	if (-BackGround_Speed >= BackGround_width) BackGround_Speed = -BackGround_width;
+	else BackGround_Speed -= 2;
 }
 
 void changeBackGround1() {
@@ -416,10 +429,7 @@ bool checkCollision(Player& player_, Enemy* enemy_) {
 
 void check_live() {
 	if (check_l) {
-		if (save == 0) {
-			player_.re_l();
-			lives_r--;
-		}
+		if (save == 0) lives_r--;
 		pro_sign.render(150, 15, NULL, renderer);
 		pro_t.renderPro_(player_, NULL, renderer);
 		save++;

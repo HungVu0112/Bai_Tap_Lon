@@ -18,21 +18,10 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="LoadImage_Func.cpp" />
-    <ClCompile Include="Player.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Enemy.h" />
-    <ClInclude Include="Loadimage_Func.h" />
-    <ClInclude Include="Player.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{ebbdb247-6465-4120-9aef-972ea51ade4e}</ProjectGuid>
+    <ProjectGuid>{a5281a1a-a378-4f94-87e7-f237fad99e4b}</ProjectGuid>
     <RootNamespace>Game</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -127,13 +116,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\sdltest\sdltest\SDL2-2.0.20\include;D:\sdltest\sdltest\SDL2_ttf-2.0.18\include;D:\sdltest\sdltest\SDL2_mixer-2.0.4\include;D:\sdltest\sdltest\SDL2_image-2.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\file_code\file_ex\SDL2-2.0.20\include;D:\file_code\file_ex\SDL2_ttf-2.0.18\include;D:\file_code\file_ex\SDL2_mixer-2.0.4\include;D:\file_code\file_ex\SDL2_image-2.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\file_code\file_ex\SDL2-2.0.20\lib\x64;D:\file_code\file_ex\SDL2_ttf-2.0.18\lib\x64;D:\file_code\file_ex\SDL2_mixer-2.0.4\lib\x64;D:\file_code\file_ex\SDL2_image-2.0.5\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\sdltest\sdltest\SDL2-2.0.20\lib\x64;D:\sdltest\sdltest\SDL2_ttf-2.0.18\lib\x64;D:\sdltest\sdltest\SDL2_mixer-2.0.4\lib\x64;D:\sdltest\sdltest\SDL2_image-2.0.5\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,6 +141,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Loadimage_Func.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Player.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Loadimage_Func.h" />
+    <ClInclude Include="Player.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

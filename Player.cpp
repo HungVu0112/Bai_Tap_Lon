@@ -21,7 +21,7 @@ bool Player::loadFromFile_(string path, SDL_Renderer* renderer) {
 		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 255, 255));
 		newtexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 		if (newtexture == NULL) {
-			cout << "Could not create texture ! " << SDL_GetError();
+			cout << "Could not create texture ! " << SDL_GetError(); 
 		}
 		else {
 			width_ = loadedSurface->w;
@@ -36,18 +36,18 @@ bool Player::loadFromFile_(string path, SDL_Renderer* renderer) {
 void Player::handleMove(SDL_Event& e, SDL_Renderer* renderer) {
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
-		case SDLK_UP: velY -= player_vel; break;
-		case SDLK_DOWN: velY += player_vel; break;
-		case SDLK_RIGHT: velX += player_vel; break;
-		case SDLK_LEFT: velX -= player_vel; break;
+		case SDLK_w: velY -= player_vel; break;
+		case SDLK_s: velY += player_vel; break;
+		case SDLK_d: velX += player_vel; break;
+		case SDLK_a: velX -= player_vel; break;
 		}
 	}
 	if (e.type == SDL_KEYUP && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
-		case SDLK_UP: velY += player_vel; break;
-		case SDLK_DOWN: velY -= player_vel; break;
-		case SDLK_RIGHT: velX -= player_vel; break;
-		case SDLK_LEFT: velX += player_vel; break;
+		case SDLK_w: velY += player_vel; break;
+		case SDLK_s: velY -= player_vel; break;
+		case SDLK_d: velX -= player_vel; break;
+		case SDLK_a: velX += player_vel; break;
 		}
 	}
 }
@@ -85,7 +85,7 @@ void Player::renderPlayer(SDL_Rect* clips, SDL_Renderer* renderer) {
 }
 
 void Player::renderPro_(Player& player_, SDL_Rect* clips, SDL_Renderer* renderer) {
-	SDL_Rect renderQuad = { player_.getX() - 21, player_.getY() - 19, width_, height_};
+	SDL_Rect renderQuad = { player_.getX() - 21, player_.getY() - 19, width_, height_ };
 	if (clips != NULL) {
 		renderQuad.w = clips->w;
 		renderQuad.h = clips->h;
@@ -100,10 +100,5 @@ void Player::free() {
 		width_ = 0;
 		height_ = 0;
 	}
-}
-
-void Player::re_l() {
-	posX = 15;
-	posY = screen_height / 2;
 }
 

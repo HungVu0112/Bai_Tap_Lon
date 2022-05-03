@@ -65,4 +65,3 @@ void Enemy::re_L(const int& x_bor) {
 	posX_e = x_bor;
 	posY_e = rand() % (610 - 100 + 1) + 100;
 }
-

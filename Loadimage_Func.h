@@ -13,7 +13,7 @@ using namespace std;
 
 const int screen_width = 1200;
 const int screen_height = 690;
-const int MAX = 44;
+const int MAX = 22;
 const int enemy_numb = 5;
 
 

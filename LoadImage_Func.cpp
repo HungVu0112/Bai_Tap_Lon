@@ -136,4 +136,3 @@ int Game::getWidth() {
 int Game::getHeight() {
 	return height;
 }
-
