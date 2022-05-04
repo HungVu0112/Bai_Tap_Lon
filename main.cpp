@@ -6,8 +6,9 @@ int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
-int e_numb = 5;
+int e_numb = 6;
 int save = 0;
+int Delay_Change_bg = 0;
 /////////////////////////////////////////////////////////////////////////////////////////
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -23,30 +24,34 @@ int menutext1_X = 100, menutext1_Y = 100;
 int menutext2_X = 150, menutext2_Y = 400;
 bool checkChangeMenu = false;
 void changeBackGround1();
-//////////////////////////////////////////////////////////////////////////////////////////////
-Game control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign;
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+Game control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign, Round1BackGround, Round2BackGround;
 Uint8 b = 255;
 int controltext_X = 190, controltext_Y = 200;
 int livestext_X = 750, livestext_Y = 200;
 int changepoint_X = 1100, changepoint_Y = 630;
 bool checkClicked = false;
 void changeBackGround2();
-////////////////////////////////////////////////////
-Player player_, Round1BackGround, Lives, pro_t;
+/////////////////////////////////////////////////////////////////
+Player player_, Lives, pro_t;
 int BackGround_Speed = 0, BackGround_width = 6131;
 ////////////////////////////////////////////////////
 Enemy* enemy_ = new Enemy[e_numb];
 void e_show();
 bool checkCollision(Player& player_, Enemy* enemy);
-stringstream Lives_Remain;
+stringstream Lives_Remain, Round_;
+int round_num = 1;
 bool check_l = false;
-int lives_r = 5, Delay_d = 30;
+int lives_r = 10, Delay_d = 30;
+Uint8 c = 255;
 void check_live();
+void changeBackGround3();
 ////////////////    GAME SETUP   /////////////////////////
 void menu_display();
 void control_display();
 void Round1_display();
-//////////////////////////////////////////////////////////
+void Round2_display();
+///////////////////////////////////////////////////////////
 
 int main(int argc, char* args[]) {
 	srand(time(0));
@@ -77,7 +82,8 @@ int main(int argc, char* args[]) {
 				// Game Play
 				if (checkClicked) {
 					if (flag == 1) changeBackGround2();
-					Round1_display();
+					if (flag == 2) Round1_display();
+					if (flag == 3) Round2_display();
 				}
 				else {
 					control_display();
@@ -198,8 +204,16 @@ bool loadBackGround() {
 		return false;
 	}
 
-	if (!Round1BackGround.loadFromFile_("Images/bgPlay1.png", renderer)) {
+	if (!Round1BackGround.loadFromFile("Images/bgPlay1.png", renderer)) {
 		cout << "Could not load back ground ! " << endl;
+		return false;
+	}
+	else {
+		Round1BackGround.setBlendMode(SDL_BLENDMODE_BLEND);
+	}
+
+	if (!Round2BackGround.loadFromFile("images/bgPlay2.png", renderer)) {
+		cout << "Could not load background ! " << endl;
 		return false;
 	}
 
@@ -215,12 +229,6 @@ bool loadBackGround() {
 
 	if (!pro_sign.loadFromFile("Images/pro_sign.png", renderer)) {
 		cout << "Could not load sign ! " << endl;
-		return false;
-	}
-
-	SDL_Color Roundtext_Color = { 160, 214, 230 };
-	if (!Roundtext.loadFromText("Round 1", "Images/lazy2.ttf", Roundtext_Color, 150, renderer)) {
-		cout << "Could not load ROUND text ! " << endl;
 		return false;
 	}
 
@@ -282,9 +290,51 @@ void control_display() {
 
 void Round1_display() {
 	player_.move(player_);
-	Round1BackGround.render_(BackGround_Speed, 0, NULL, renderer);
+	Round1BackGround.render(BackGround_Speed, 0, NULL, renderer);
 
 	while (DelayTime > 0) {
+		Round_.str("");
+		Round_ << "Round " << round_num;
+		SDL_Color Round_Color = { 188, 160, 194 };
+		if (!Roundtext.loadFromText(Round_.str().c_str(), "Images/lazy2.ttf", Round_Color, 150, renderer)) {
+			cout << "Could not load Round text ! " << endl;
+		}
+		Roundtext.render(350, 250, NULL, renderer);
+		SDL_RenderPresent(renderer);
+		DelayTime--; 
+	}
+
+	Lives.render_(50, 20, NULL, renderer);
+	player_.renderPlayer(NULL, renderer);
+	if (-BackGround_Speed < BackGround_width) e_show();
+	check_live();
+
+	if (save == 240) {
+		check_l = false;
+		save = 0;
+	}
+
+	SDL_RenderPresent(renderer);
+
+	if (-BackGround_Speed >= BackGround_width) {
+		if (Delay_Change_bg < 60) BackGround_Speed = -BackGround_width;
+		else changeBackGround3();
+		Delay_Change_bg++;
+	}
+	else BackGround_Speed -= 2;
+}
+
+void Round2_display() {
+	player_.move(player_);
+	Round2BackGround.render(BackGround_Speed, 0, NULL, renderer);
+
+	while (DelayTime > 0) {
+		Round_.str("");
+		Round_ << "Round " << round_num;
+		SDL_Color Round_Color = { 188, 160, 194 };
+		if (!Roundtext.loadFromText(Round_.str().c_str(), "Images/lazy2.ttf", Round_Color, 150, renderer)) {
+			cout << "Could not load Round text ! " << endl;
+		}
 		Roundtext.render(350, 250, NULL, renderer);
 		SDL_RenderPresent(renderer);
 		DelayTime--;
@@ -322,12 +372,33 @@ void changeBackGround2() {
 	while (b > 0) {
 		b -= 5;
 
-		Round1BackGround.render_(0, 0, NULL, renderer);
+		Round1BackGround.render(0, 0, NULL, renderer);
 		control_.setAlphaMod(b);
 		control_.render(0, 0, NULL, renderer);
 		SDL_RenderPresent(renderer);
 	}
 	flag++;
+}
+
+void changeBackGround3() {
+	while (c > 0) {
+		c -= 5;
+
+		Round2BackGround.render(0, 0, NULL, renderer);
+		Round1BackGround.setAlphaMod(c);
+		Round1BackGround.render(0, 0, NULL, renderer);
+		SDL_RenderPresent(renderer);
+	}
+	flag++;
+	BackGround_Speed = 0; DelayTime = 100;
+	e_numb++;
+	enemy_ = new Enemy[e_numb];
+	for (int i = 0; i < e_numb; i++) {
+		Enemy* enemy__ = (enemy_ + i);
+		enemy__->loadFromFile_e("Images/sand_spike.png", renderer);
+		enemy__->setPos_x(i * 200);
+	}
+	round_num++;
 }
 
 void e_show() {
