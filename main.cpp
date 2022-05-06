@@ -6,7 +6,7 @@ int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
-int e_numb = 6;
+int e_numb = 7;
 int save = 0;
 int Delay_Change_bg = 0;
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -26,24 +26,23 @@ bool checkChangeMenu = false;
 void changeBackGround1();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 Game control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign, Round1BackGround, Round2BackGround;
-Uint8 b = 255;
 int controltext_X = 190, controltext_Y = 200;
 int livestext_X = 750, livestext_Y = 200;
 int changepoint_X = 1100, changepoint_Y = 630;
 bool checkClicked = false;
 void changeBackGround2();
 /////////////////////////////////////////////////////////////////
-Player player_, Lives, pro_t;
+Player* player_ = new Player();
+Player Lives, pro_t;
 int BackGround_Speed = 0, BackGround_width = 6131;
 ////////////////////////////////////////////////////
 Enemy* enemy_ = new Enemy[e_numb];
 void e_show();
-bool checkCollision(Player& player_, Enemy* enemy);
+bool checkCollision(Player* player_ = NULL, Enemy* enemy = NULL);
 stringstream Lives_Remain, Round_;
 int round_num = 1;
 bool check_l = false;
-int lives_r = 10, Delay_d = 30;
-Uint8 c = 255;
+int lives_r = 2, Delay_d = 30;
 void check_live();
 void changeBackGround3();
 ////////////////    GAME SETUP   /////////////////////////
@@ -51,6 +50,7 @@ void menu_display();
 void control_display();
 void Round1_display();
 void Round2_display();
+void reset();
 ///////////////////////////////////////////////////////////
 
 int main(int argc, char* args[]) {
@@ -69,7 +69,7 @@ int main(int argc, char* args[]) {
 				if (e.type == SDL_QUIT) quit = true;
 				if (flag == 0) menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu);
 				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked);
-				player_.handleMove(e, renderer);
+				player_->handleMove(e, renderer);
 
 			}
 
@@ -199,7 +199,7 @@ bool loadBackGround() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Player Texture 
-	if (!player_.loadFromFile_("Images/plane.png", renderer)) {
+	if (!player_->loadFromFile_("Images/plane.png", renderer)) {
 		cout << "Could not load player texture ! " << endl;
 		return false;
 	}
@@ -289,7 +289,7 @@ void control_display() {
 }
 
 void Round1_display() {
-	player_.move(player_);
+	player_->move(player_);
 	Round1BackGround.render(BackGround_Speed, 0, NULL, renderer);
 
 	while (DelayTime > 0) {
@@ -305,7 +305,7 @@ void Round1_display() {
 	}
 
 	Lives.render_(50, 20, NULL, renderer);
-	player_.renderPlayer(NULL, renderer);
+	player_->renderPlayer(NULL, renderer);
 	if (-BackGround_Speed < BackGround_width) e_show();
 	check_live();
 
@@ -325,7 +325,7 @@ void Round1_display() {
 }
 
 void Round2_display() {
-	player_.move(player_);
+	player_->move(player_);
 	Round2BackGround.render(BackGround_Speed, 0, NULL, renderer);
 
 	while (DelayTime > 0) {
@@ -341,7 +341,7 @@ void Round2_display() {
 	}
 
 	Lives.render_(50, 20, NULL, renderer);
-	player_.renderPlayer(NULL, renderer);
+	player_->renderPlayer(NULL, renderer);
 	if (-BackGround_Speed < BackGround_width) e_show();
 	check_live();
 
@@ -366,30 +366,33 @@ void changeBackGround1() {
 		SDL_RenderPresent(renderer);
 	}
 	flag++;
+	a = 255;
 }
 
 void changeBackGround2() {
-	while (b > 0) {
-		b -= 5;
+	while (a > 0) {
+		a -= 5;
 
 		Round1BackGround.render(0, 0, NULL, renderer);
-		control_.setAlphaMod(b);
+		control_.setAlphaMod(a);
 		control_.render(0, 0, NULL, renderer);
 		SDL_RenderPresent(renderer);
 	}
 	flag++;
+	a = 255;
 }
 
 void changeBackGround3() {
-	while (c > 0) {
-		c -= 5;
+	while (a > 0) {
+		a -= 5;
 
 		Round2BackGround.render(0, 0, NULL, renderer);
-		Round1BackGround.setAlphaMod(c);
+		Round1BackGround.setAlphaMod(a);
 		Round1BackGround.render(0, 0, NULL, renderer);
 		SDL_RenderPresent(renderer);
 	}
 	flag++;
+	a = 255;
 	BackGround_Speed = 0; DelayTime = 100;
 	e_numb++;
 	enemy_ = new Enemy[e_numb];
@@ -399,6 +402,23 @@ void changeBackGround3() {
 		enemy__->setPos_x(i * 200);
 	}
 	round_num++;
+}
+
+void reset() {
+	flag = 0;
+	lives_r = 10;
+	DelayTime = 100;
+	BackGround_Speed = 0;
+	
+	checkChangeMenu = false;
+	checkClicked = false;
+	
+	menu.setAlphaMod(a);
+	control_.setAlphaMod(a);
+	Round1BackGround.setAlphaMod(a);
+
+	SDL_Color menutext2_c = { 0, 0, 0 };
+	menutext2.loadFromText("Playe Again", "Images/lazy2.ttf", menutext2_c, 70, renderer);
 }
 
 void e_show() {
@@ -415,11 +435,11 @@ void e_show() {
 	}
 }
 
-bool checkCollision(Player& player_, Enemy* enemy_) {
-	int left_a = player_.getX();
-	int right_a = player_.getX() + player_.getWidth_();
-	int top_a = player_.getY();
-	int bottom_a = player_.getY() + player_.getHeight_();
+bool checkCollision(Player* player_, Enemy* enemy_) {
+	int left_a = player_->getX();
+	int right_a = player_->getX() + player_->getWidth_();
+	int top_a = player_->getY();
+	int bottom_a = player_->getY() + player_->getHeight_();
 
 	int left_b = enemy_->getX();
 	int right_b = enemy_->getX() + enemy_->getWidth_e();
@@ -504,6 +524,10 @@ void check_live() {
 		pro_sign.render(150, 15, NULL, renderer);
 		pro_t.renderPro_(player_, NULL, renderer);
 		save++;
+	}
+
+	if (lives_r == 0) {
+		reset();
 	}
 
 	Lives_Remain.str("");

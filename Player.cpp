@@ -52,16 +52,16 @@ void Player::handleMove(SDL_Event& e, SDL_Renderer* renderer) {
 	}
 }
 
-void Player::move(Player& player_) {
+void Player::move(Player* player_) {
 	posX += velX;
 
-	if ((posX < 0) || (posX + player_.getWidth_() > screen_width)) {
+	if ((posX < 0) || (posX + player_->getWidth_() > screen_width)) {
 		posX -= velX;
 	}
 
 	posY += velY;
 
-	if ((posY < 0) || (posY + player_.getHeight_() > screen_height)) {
+	if ((posY < 0) || (posY + player_->getHeight_() > screen_height)) {
 		posY -= velY;
 	}
 }
@@ -84,8 +84,8 @@ void Player::renderPlayer(SDL_Rect* clips, SDL_Renderer* renderer) {
 	SDL_RenderCopy(renderer, texture_, clips, &renderQuad);
 }
 
-void Player::renderPro_(Player& player_, SDL_Rect* clips, SDL_Renderer* renderer) {
-	SDL_Rect renderQuad = { player_.getX() - 21, player_.getY() - 19, width_, height_ };
+void Player::renderPro_(Player* player_, SDL_Rect* clips, SDL_Renderer* renderer) {
+	SDL_Rect renderQuad = { player_->getX() - 21, player_->getY() - 19, width_, height_ };
 	if (clips != NULL) {
 		renderQuad.w = clips->w;
 		renderQuad.h = clips->h;

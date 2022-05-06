@@ -18,11 +18,11 @@ public:
 
 	bool loadFromFile_(string path, SDL_Renderer* renderer = NULL);
 	void handleMove(SDL_Event& e, SDL_Renderer* renderer = NULL);
-	void move(Player& player_);
+	void move(Player* player_ = NULL);
 	void render_(int x, int y, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
 
 	void renderPlayer(SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
-	void renderPro_(Player& player_, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
+	void renderPro_(Player* player_ = NULL, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
 
 	void free();
 
