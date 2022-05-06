@@ -23,6 +23,7 @@ public:
 
 	void renderPlayer(SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
 	void renderPro_(Player* player_ = NULL, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
+	void re_loc();
 
 	void free();
 

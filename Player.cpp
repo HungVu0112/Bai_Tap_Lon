@@ -93,6 +93,12 @@ void Player::renderPro_(Player* player_, SDL_Rect* clips, SDL_Renderer* renderer
 	SDL_RenderCopy(renderer, texture_, clips, &renderQuad);
 }
 
+void Player::re_loc() {
+	posX = 15;
+	posY = screen_height / 2;
+}
+
+
 void Player::free() {
 	if (texture_ != NULL) {
 		SDL_DestroyTexture(texture_);

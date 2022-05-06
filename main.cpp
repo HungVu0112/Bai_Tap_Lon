@@ -6,7 +6,7 @@ int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
-int e_numb = 7;
+int e_numb = 7, live_numb = 10;
 int save = 0;
 int Delay_Change_bg = 0;
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -17,14 +17,16 @@ TTF_Font* font = NULL;
 bool initSDL();
 bool loadBackGround();
 void close();           
-////////////////////////////////////////////////
-Game menu, menutext1, menutext2, menutext3;
+////////////////////////////////////////////////////////
+Game menu, menutext1, menutext2, menutext3, game_over_;
 Uint8 a = 255;
 int menutext1_X = 100, menutext1_Y = 100;
 int menutext2_X = 150, menutext2_Y = 400;
+int menutext3_X = 150, menutext3_Y = 500;
 bool checkChangeMenu = false;
+bool check_quit = false;
 void changeBackGround1();
-////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Game control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign, Round1BackGround, Round2BackGround;
 int controltext_X = 190, controltext_Y = 200;
 int livestext_X = 750, livestext_Y = 200;
@@ -42,7 +44,7 @@ bool checkCollision(Player* player_ = NULL, Enemy* enemy = NULL);
 stringstream Lives_Remain, Round_;
 int round_num = 1;
 bool check_l = false;
-int lives_r = 2, Delay_d = 30;
+int lives_r = live_numb, Delay_d = 30, gameover_time_display = 100;
 void check_live();
 void changeBackGround3();
 ////////////////    GAME SETUP   /////////////////////////
@@ -67,7 +69,10 @@ int main(int argc, char* args[]) {
 		while (!quit) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) quit = true;
-				if (flag == 0) menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu);
+				if (flag == 0) {
+					menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu);
+					menutext3.handleEvent(e, menutext3_X, menutext3_Y, menutext3, check_quit);
+				}
 				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked);
 				player_->handleMove(e, renderer);
 
@@ -75,6 +80,9 @@ int main(int argc, char* args[]) {
 
 			SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
 			SDL_RenderClear(renderer);
+
+			// Quit game
+			if (check_quit) quit = true;
 
 			// Control Guide
 			if (checkChangeMenu) {
@@ -151,6 +159,13 @@ bool loadBackGround() {
 		cout << "Could not load text ! " << endl;
 		return false;
 	}
+
+	SDL_Color menutext3_color = { 0, 0, 0 };
+	if (!menutext3.loadFromText("EXIT", "Images/lazy2.ttf", menutext3_color, 70, renderer)) {
+		cout << "Could not load text ! " << endl;
+		return false;
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -245,6 +260,12 @@ bool loadBackGround() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	SDL_Color game_over_color = { 188, 160, 194 };
+	if (!game_over_.loadFromText("Game Over ! ", "Images/lazy2.ttf", game_over_color, 150, renderer)) {
+		cout << "Could not load game over text ! " << endl;
+		return false;
+	}
+
 	return true;
 }
 
@@ -263,6 +284,7 @@ void menu_display() {
 	menu.render(0, 0, NULL, renderer);
 	menutext1.render(menutext1_X, menutext1_Y, NULL, renderer);
 	menutext2.render(menutext2_X, menutext2_Y, NULL, renderer);
+	menutext3.render(menutext3_X, menutext3_Y, NULL, renderer);
 
 	SDL_RenderPresent(renderer);
 
@@ -391,34 +413,51 @@ void changeBackGround3() {
 		Round1BackGround.render(0, 0, NULL, renderer);
 		SDL_RenderPresent(renderer);
 	}
+	
 	flag++;
 	a = 255;
 	BackGround_Speed = 0; DelayTime = 100;
 	e_numb++;
+	round_num++;
+	
 	enemy_ = new Enemy[e_numb];
 	for (int i = 0; i < e_numb; i++) {
 		Enemy* enemy__ = (enemy_ + i);
 		enemy__->loadFromFile_e("Images/sand_spike.png", renderer);
 		enemy__->setPos_x(i * 200);
 	}
-	round_num++;
+
+	player_->re_loc();
 }
 
 void reset() {
 	flag = 0;
-	lives_r = 10;
+	lives_r = live_numb;
 	DelayTime = 100;
 	BackGround_Speed = 0;
+	round_num = 1;
+	e_numb = 7;
+	gameover_time_display = 100;
 	
 	checkChangeMenu = false;
 	checkClicked = false;
+	check_l = false;
 	
 	menu.setAlphaMod(a);
 	control_.setAlphaMod(a);
 	Round1BackGround.setAlphaMod(a);
 
 	SDL_Color menutext2_c = { 0, 0, 0 };
-	menutext2.loadFromText("Playe Again", "Images/lazy2.ttf", menutext2_c, 70, renderer);
+	menutext2.loadFromText("PLAY AGAIN", "Images/lazy2.ttf", menutext2_c, 70, renderer);
+
+	enemy_ = new Enemy[e_numb];
+	for (int i = 0; i < e_numb; i++) {
+		Enemy* enemy__ = (enemy_ + i);
+		enemy__->loadFromFile_e("Images/icespike1.png", renderer);
+		enemy__->setPos_x(i * 200);
+	}
+
+	player_->re_loc();
 }
 
 void e_show() {
@@ -527,6 +566,11 @@ void check_live() {
 	}
 
 	if (lives_r == 0) {
+		while (gameover_time_display > 0) {
+			game_over_.render(250, 250, NULL, renderer);
+			SDL_RenderPresent(renderer);
+			gameover_time_display--;
+		}
 		reset();
 	}
 
