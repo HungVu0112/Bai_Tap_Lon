@@ -1,37 +1,28 @@
-#ifndef PLAYER_H
-#define PLEYER_H
+#ifndef PLAYER_
+#define PLAYER_
 
-#include "Loadimage_Func.h"
+#include "loadImage.h"
 
-class Player {
-private:
-	SDL_Texture* texture_;
-	int width_;
-	int height_;
-
-	int posX, posY;
-	int velX, velY;
+class Player : public BackGround {
 public:
 	const int player_vel = 10;
 
 	Player();
 
-	bool loadFromFile_(string path, SDL_Renderer* renderer = NULL);
-	void handleMove(SDL_Event& e, SDL_Renderer* renderer = NULL);
+	void handleMove(SDL_Event& e);
 	void move(Player* player_ = NULL);
-	void render_(int x, int y, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
-
-	void renderPlayer(SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
-	void renderPro_(Player* player_ = NULL, SDL_Rect* clips = NULL, SDL_Renderer* renderer = NULL);
+	void render_(Player* player_ = NULL);
+	void renderPro_(Player& pro_t ,Player* player_ = NULL);
 	void re_loc();
-
-	void free();
-
-	int getWidth_() { return width_; }
-	int getHeight_() { return height_; }
 
 	int getX() { return posX; }
 	int getY() { return posY; }
+private:
+	int posX;
+	int posY;
+
+	int velX;
+	int velY;
 };
 
 #endif

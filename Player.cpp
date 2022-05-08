@@ -1,39 +1,14 @@
-#include "Player.h"
+#include "player.h"
 
 Player::Player() {
-	texture_ = NULL;
-	width_ = 0;
-	height_ = 0;
+	posX = 15;
+	posY = screen_height / 2;
 
-	posX = 15; posY = screen_height / 2;
-	velX = 0; velY = 0;
+	velX = 0;
+	velY = 0;
 }
 
-bool Player::loadFromFile_(string path, SDL_Renderer* renderer) {
-	free();
-
-	SDL_Texture* newtexture = NULL;
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == NULL) {
-		cout << "Could not load image ! " << IMG_GetError();
-	}
-	else {
-		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 255, 255));
-		newtexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
-		if (newtexture == NULL) {
-			cout << "Could not create texture ! " << SDL_GetError(); 
-		}
-		else {
-			width_ = loadedSurface->w;
-			height_ = loadedSurface->h;
-		}
-		SDL_FreeSurface(loadedSurface);
-	}
-	texture_ = newtexture;
-	return texture_ != NULL;
-}
-
-void Player::handleMove(SDL_Event& e, SDL_Renderer* renderer) {
+void Player::handleMove(SDL_Event& e) {
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
 		case SDLK_w: velY -= player_vel; break;
@@ -55,56 +30,27 @@ void Player::handleMove(SDL_Event& e, SDL_Renderer* renderer) {
 void Player::move(Player* player_) {
 	posX += velX;
 
-	if ((posX < 0) || (posX + player_->getWidth_() > screen_width)) {
+	if ((posX < 0) || (posX + player_->getWidth() > screen_width)) {
 		posX -= velX;
 	}
 
 	posY += velY;
 
-	if ((posY < 0) || (posY + player_->getHeight_() > screen_height)) {
+	if ((posY < 0) || (posY + player_->getHeight() > screen_height)) {
 		posY -= velY;
 	}
 }
 
-void Player::render_(int x, int y, SDL_Rect* clips, SDL_Renderer* renderer) {
-	SDL_Rect renderQuad = { x, y, width_, height_ };
-	if (clips != NULL) {
-		renderQuad.w = clips->w;
-		renderQuad.h = clips->h;
-	}
-	SDL_RenderCopy(renderer, texture_, clips, &renderQuad);
+void Player::render_(Player* player_) {
+	player_->render(posX, posY);
 }
 
-void Player::renderPlayer(SDL_Rect* clips, SDL_Renderer* renderer) {
-	SDL_Rect renderQuad = { posX, posY, width_, height_ };
-	if (clips != NULL) {
-		renderQuad.w = clips->w;
-		renderQuad.h = clips->h;
-	}
-	SDL_RenderCopy(renderer, texture_, clips, &renderQuad);
+void Player::renderPro_(Player& pro_t ,Player* player_) {
+	pro_t.render(player_->getX() - 21, player_->getY() - 19);
 }
 
-void Player::renderPro_(Player* player_, SDL_Rect* clips, SDL_Renderer* renderer) {
-	SDL_Rect renderQuad = { player_->getX() - 21, player_->getY() - 19, width_, height_ };
-	if (clips != NULL) {
-		renderQuad.w = clips->w;
-		renderQuad.h = clips->h;
-	}
-	SDL_RenderCopy(renderer, texture_, clips, &renderQuad);
-}
 
 void Player::re_loc() {
 	posX = 15;
 	posY = screen_height / 2;
 }
-
-
-void Player::free() {
-	if (texture_ != NULL) {
-		SDL_DestroyTexture(texture_);
-		texture_ = NULL;
-		width_ = 0;
-		height_ = 0;
-	}
-}
-

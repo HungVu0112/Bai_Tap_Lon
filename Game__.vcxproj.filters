@@ -18,10 +18,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="loadImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Loadimage_Func.cpp">
+    <ClCompile Include="player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Enemy.cpp">
@@ -29,10 +29,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Player.h">
+    <ClInclude Include="loadImage.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Loadimage_Func.h">
+    <ClInclude Include="player.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Enemy.h">
