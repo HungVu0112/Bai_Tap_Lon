@@ -75,7 +75,7 @@ void BackGround::render(int x, int y, SDL_Rect* clips) {
 	SDL_RenderCopy(renderer, texture, clips, &renderQuad);
 }
 
-void BackGround::handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed) {
+void BackGround::handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed, Mix_Chunk* click_s) {
 	if (e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
 		int x, y;
 		SDL_GetMouseState(&x, &y);
@@ -109,6 +109,8 @@ void BackGround::handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_
 			case SDL_MOUSEBUTTONDOWN:
 				posX -= 3;
 				posY += 3;
+				if (Mix_PlayingMusic() == 1) Mix_PauseMusic();
+				Mix_PlayChannel(-1, click_s, 0);
 				checkPlayed = true;
 				break;
 			case SDL_MOUSEBUTTONUP:
@@ -137,6 +139,10 @@ int BackGround::getHeight() {
 }
 
 bool initSDL() {
+	if (SDL_Init(SDL_INIT_AUDIO < 0)) {
+		cout << "Could not initialize ! " << endl;
+		return false;
+	}
 	window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);
 	if (window == NULL) {
 		cout << "Could not create window ! " << SDL_GetError();
@@ -161,6 +167,11 @@ bool initSDL() {
 				cout << "SDL_ttf could not initialize ! " << TTF_GetError();
 				return false;
 			}
+
+			if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+				cout << "SDL_mixer could not initialize ! " << endl;
+				return false;
+			}
 		}
 	}
 	return true;
@@ -172,6 +183,7 @@ void close() {
 	renderer = NULL;
 	window = NULL;
 
+	Mix_Quit();
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();

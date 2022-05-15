@@ -1,12 +1,13 @@
 #include "loadImage.h"
 #include "player.h"
 #include "Enemy.h"
+#include "bullet.h"
 
 int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3 };
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
-int e_numb = 7, live_numb = 1;
+int e_numb = 7, live_numb = 10;
 int save = 0;
 int Delay_Change_bg = 0;
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +57,18 @@ void Round1_display();
 void Round2_display();
 void reset();
 ////////////////////////
+void emotion();
+Enemy boss_;
+SDL_Rect clips_[5];
+void bossrender();
+void frame__();
+int frame = 0;
+//////////////////////////////////
+// MUSIC // 
+Mix_Music* openMusic = NULL;
+Mix_Chunk* click_s = NULL;
+Mix_Chunk* crash = NULL;
+Mix_Chunk* gameover = NULL;
 
 int main(int argc, char* args[]) {
 	srand(time(0));
@@ -72,12 +85,11 @@ int main(int argc, char* args[]) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) quit = true;
 				if (flag == 0) {
-					menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu);
-					menutext3.handleEvent(e, menutext3_X, menutext3_Y, menutext3, check_quit);
+					menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu, click_s);
+					menutext3.handleEvent(e, menutext3_X, menutext3_Y, menutext3, check_quit, click_s);
 				}
-				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked);
-				player_->handleMove(e);
-
+				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked, click_s);
+					player_->handleMove(e);
 			}
 
 			SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
@@ -106,12 +118,36 @@ int main(int argc, char* args[]) {
 		}
 	}
 	close();
-	return 0;
+	return 0; 
 }
 
 
 bool Image() {
+	// Music
+	openMusic = Mix_LoadMUS("Sounds/opening.mp3");
+	if (openMusic == NULL) {
+		cout << "Could not load opening music ! " << endl;
+		return false;
+	}
 
+	click_s = Mix_LoadWAV("Sounds/click_s.wav");
+	if (click_s == NULL) {
+		cout << "Could not load click sound ! " << endl;
+		return false;
+	}
+
+	crash = Mix_LoadWAV("Sounds/boom.wav");
+	if (crash == NULL) {
+		cout << "Could not load crash sound ! " << endl;
+		return false;
+	}
+
+	gameover = Mix_LoadWAV("Sounds/gameover.wav");
+	if (gameover == NULL) {
+		cout << "Could not load gameover sound ! " << endl;
+		return false;
+	}
+	/////////////////////////////////////////////////////////
 	// Menu background
 	if (!menu.loadFromFile("Images/menutex.png")) {
 		cout << "Could not load menu texture ! " << endl;
@@ -239,10 +275,43 @@ bool Image() {
 		return false;
 	}
 
+	if (!boss_.loadFromFile("Images/boss.png")) {
+		cout << "Could not load boss texture ! " << endl;
+		return false;
+	}
+	else {
+		clips_[0].x = 0;
+		clips_[0].y = 0;
+		clips_[0].w = 206;
+		clips_[0].h = 206;
+
+		clips_[1].x = 206;
+		clips_[1].y = 0;
+		clips_[1].w = 214;
+		clips_[1].h = 214;
+
+		clips_[2].x = 420;
+		clips_[2].y = 0;
+		clips_[2].w = 214;
+		clips_[2].h = 192;
+
+		clips_[3].x = 634;
+		clips_[3].y = 0;
+		clips_[3].w = 177;
+		clips_[3].h = 199;
+
+		clips_[4].x = 811;
+		clips_[4].y = 0;
+		clips_[4].w = 169;
+		clips_[4].h = 206;
+	}
+
 	return true;
 }
 
 void menu_display() {
+	if (Mix_PausedMusic() == 1) Mix_PlayMusic(openMusic, 0);
+	if (Mix_PlayingMusic() == 0 ) Mix_PlayMusic(openMusic, 0);
 	menu.render(0, 0);
 	menutext1.render(menutext1_X, menutext1_Y);
 	menutext2.render(menutext2_X, menutext2_Y);
@@ -257,6 +326,7 @@ void menu_display() {
 }
 
 void control_display() {
+	if (Mix_PausedMusic() == 1 ) Mix_ResumeMusic();
 	control_.render(0, 0);
 	controltext.render(controltext_X, controltext_Y);
 	control.render(250, 350);
@@ -290,7 +360,8 @@ void Round1_display() {
 
 	Lives.render(50, 20);
 	player_->render_(player_);
-	if (-BackGround_Speed < BackGround_width) e_show();
+	
+	e_show();
 	check_live();
 
 	if (save == 240) {
@@ -326,7 +397,7 @@ void Round2_display() {
 
 	Lives.render(50, 20);
 	player_->render_(player_);
-	if (-BackGround_Speed < BackGround_width) e_show();
+	e_show();
 	check_live();
 
 	if (save == 240) {
@@ -400,6 +471,7 @@ void reset() {
 	round_num = 1;
 	e_numb = 7;
 	gameover_time_display = 100;
+	Delay_Change_bg = 0;
 
 	checkChangeMenu = false;
 	checkClicked = false;
@@ -428,7 +500,12 @@ void e_show() {
 		if (enemy__ != NULL) {
 			enemy__->HandleMove_e(screen_width, screen_height);
 			enemy__->render_e(enemy__);
-			if (checkCollision(player_, enemy__)) {
+			if (BackGround_Speed == -BackGround_width) {
+				if (enemy__->getX() < -200)
+					enemy__->free();
+			}
+			else if (checkCollision(player_, enemy__)) {
+				if (save == 0 && lives_r > 1) Mix_PlayChannel(-1, crash, 0);
 				check_l = true;
 				enemy__->re_L(screen_width);
 			}
@@ -528,6 +605,7 @@ void check_live() {
 	}
 
 	if (lives_r == 0) {
+		Mix_PlayChannel(-1, gameover, 0);
 		while (gameover_time_display > 0) {
 			game_over_.render(250, 250);
 			SDL_RenderPresent(renderer);
@@ -544,4 +622,14 @@ void check_live() {
 	}
 
 	Live_re.render(120, 30);
+}
+
+void bossrender() {
+	SDL_Rect* c_clips = &clips_[frame / 7];
+	boss_.render(900, 250, c_clips);
+}
+
+void frame__() {
+	frame++;
+	if (frame / 7 >= 5) frame = 0;
 }

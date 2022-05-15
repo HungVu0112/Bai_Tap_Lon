@@ -2,6 +2,7 @@
 #define PLAYER_
 
 #include "loadImage.h"
+#include "bullet.h"
 
 class Player : public BackGround {
 public:

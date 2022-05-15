@@ -9,6 +9,7 @@
 #include <SDL_mixer.h>
 #include <sstream>
 #include <time.h>
+#include <vector>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ public:
 
 	void render(int x, int y, SDL_Rect* clips = NULL);
 
-	void handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed);
+	void handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed, Mix_Chunk* click_s = NULL);
 	void setBlendMode(SDL_BlendMode blending);
 	void setAlphaMod(Uint8 alpha);
 

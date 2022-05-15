@@ -11,18 +11,18 @@ Player::Player() {
 void Player::handleMove(SDL_Event& e) {
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
-		case SDLK_w: velY -= player_vel; break;
-		case SDLK_s: velY += player_vel; break;
-		case SDLK_d: velX += player_vel; break;
-		case SDLK_a: velX -= player_vel; break;
+		case SDLK_UP: velY -= player_vel; break;
+		case SDLK_DOWN: velY += player_vel; break;
+		case SDLK_RIGHT: velX += player_vel; break;
+		case SDLK_LEFT: velX -= player_vel; break;
 		}
 	}
 	if (e.type == SDL_KEYUP && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
-		case SDLK_w: velY += player_vel; break;
-		case SDLK_s: velY -= player_vel; break;
-		case SDLK_d: velX -= player_vel; break;
-		case SDLK_a: velX += player_vel; break;
+		case SDLK_UP: velY += player_vel; break;
+		case SDLK_DOWN: velY -= player_vel; break;
+		case SDLK_RIGHT: velX -= player_vel; break;
+		case SDLK_LEFT: velX += player_vel; break;
 		}
 	}
 }
