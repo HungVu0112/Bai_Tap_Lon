@@ -3,6 +3,7 @@
 
 #include "loadImage.h"
 #include "bullet.h"
+#include <vector>
 
 class Player : public BackGround {
 public:
@@ -10,7 +11,7 @@ public:
 
 	Player();
 
-	void handleMove(SDL_Event& e);
+	void handleMove(SDL_Event& e, Player* player_);
 	void move(Player* player_ = NULL);
 	void render_(Player* player_ = NULL);
 	void renderPro_(Player& pro_t ,Player* player_ = NULL);
@@ -18,12 +19,18 @@ public:
 
 	int getX() { return posX; }
 	int getY() { return posY; }
+
+	void setb_list(vector <Bullet*> bullet_list_) { bullet_list = bullet_list_; }
+	vector <Bullet*> getBullet_list() { return bullet_list; }
+
 private:
 	int posX;
 	int posY;
 
 	int velX;
 	int velY;
+
+	vector <Bullet*> bullet_list;
 };
 
 #endif

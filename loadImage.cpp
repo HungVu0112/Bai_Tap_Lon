@@ -38,6 +38,10 @@ bool BackGround::loadFromText(string text, string textFont, SDL_Color textColor,
 	free();
 
 	font = TTF_OpenFont(textFont.c_str(), size);
+	if (font == NULL) {
+		cout << "Could not load Font ! " << endl;
+		return false;
+	}
 
 	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
 	if (textSurface == NULL) {
@@ -65,7 +69,7 @@ void BackGround::free() {
 		height = 0;
 	}
 }
-
+ 
 void BackGround::render(int x, int y, SDL_Rect* clips) {
 	SDL_Rect renderQuad = { x, y, width, height };
 	if (clips != NULL) {

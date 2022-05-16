@@ -1,17 +1,19 @@
 #include "bullet.h"
 
-Bullet::Bullet() {
-	posX_b = 0;
-	posY_b = 0;
+Bullet::Bullet(int x, int y) {
+	posX_b = x;
+	posY_b = y;
 
 	velX_b = 15;
+
+	ismoved_ = false;
 }
 
 void Bullet::move() {
 	posX_b += velX_b;
 
 	if (posX_b > screen_width) {
-		free();
+		ismoved_ = false;
 	}
 }
 

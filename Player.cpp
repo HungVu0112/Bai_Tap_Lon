@@ -8,7 +8,7 @@ Player::Player() {
 	velY = 0;
 }
 
-void Player::handleMove(SDL_Event& e) {
+void Player::handleMove(SDL_Event& e, Player* player_) {
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
 		case SDLK_UP: velY -= player_vel; break;
@@ -24,6 +24,13 @@ void Player::handleMove(SDL_Event& e) {
 		case SDLK_RIGHT: velX -= player_vel; break;
 		case SDLK_LEFT: velX += player_vel; break;
 		}
+	}
+	
+	if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE && e.key.repeat == 0) {
+		Bullet* new_bullet = new Bullet(player_->getX() + player_->getWidth(), player_->getY());
+		new_bullet->loadFromFile("Images/bullet.png");
+		new_bullet->setmove(true);
+		bullet_list.push_back(new_bullet);
 	}
 }
 

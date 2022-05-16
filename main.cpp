@@ -10,7 +10,7 @@ int DelayTime = 100;
 int e_numb = 7, live_numb = 10;
 int save = 0;
 int Delay_Change_bg = 0;
-/////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 TTF_Font* font = NULL;
@@ -27,8 +27,8 @@ int menutext3_X = 150, menutext3_Y = 500;
 bool checkChangeMenu = false;
 bool check_quit = false;
 void changeBackGround1();
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-BackGround control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign, Round1BackGround, Round2BackGround;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+BackGround control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign, Round1BackGround, Round2BackGround, Round3BackGround;
 int controltext_X = 190, controltext_Y = 200;
 int livestext_X = 750, livestext_Y = 200;
 int changepoint_X = 1100, changepoint_Y = 630;
@@ -55,21 +55,29 @@ void changeBackGround3();
 void menu_display();
 void Round1_display();
 void Round2_display();
+void Round3_display();
 void reset();
-////////////////////////
-void emotion();
-Enemy boss_;
-SDL_Rect clips_[5];
-void bossrender();
-void frame__();
-int frame = 0;
+void changeBackGround4();
+//////////////////////////
+int bg_frame = 0;
+SDL_Rect bg_clips[4];
+void setClipsbg();
+void setbg_motion();
+void renderBG();
+Enemy boss;
+int boss_frame = 0;
+SDL_Rect boss_clips[12];
+void setClipsBoss();
+void setboss_motion();
+void renderboss();
+void fire();
 //////////////////////////////////
 // MUSIC // 
 Mix_Music* openMusic = NULL;
 Mix_Chunk* click_s = NULL;
 Mix_Chunk* crash = NULL;
 Mix_Chunk* gameover = NULL;
-
+////////////////////////////
 int main(int argc, char* args[]) {
 	srand(time(0));
 	if (!initSDL()) {
@@ -89,7 +97,7 @@ int main(int argc, char* args[]) {
 					menutext3.handleEvent(e, menutext3_X, menutext3_Y, menutext3, check_quit, click_s);
 				}
 				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked, click_s);
-					player_->handleMove(e);
+				player_->handleMove(e, player_);
 			}
 
 			SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
@@ -106,6 +114,7 @@ int main(int argc, char* args[]) {
 					if (flag == 1) changeBackGround2();
 					if (flag == 2) Round1_display();
 					if (flag == 3) Round2_display();
+					if (flag == 4) Round3_display();
 				}
 				else {
 					control_display();
@@ -240,6 +249,15 @@ bool Image() {
 		cout << "Could not load background ! " << endl;
 		return false;
 	}
+	else {
+		Round2BackGround.setBlendMode(SDL_BLENDMODE_BLEND);
+	}
+
+	if (!Round3BackGround.loadFromFile("images/bgPlay3.png")) {
+		cout << "Could not load background ! " << endl;
+		return false;
+	}
+	else setClipsbg();
 
 	if (!Lives.loadFromFile("Images/heartreal.png")) {
 		cout << "Could not load heart_2 texture ! " << endl;
@@ -266,6 +284,12 @@ bool Image() {
 		enemy__->setPos_x(i * 200);
 	}
 
+	if (!boss.loadFromFile("Images/boss.png")) {
+		cout << "Could not load boss texture ! " << endl;
+		return false;
+	}
+	else setClipsBoss();
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -275,36 +299,6 @@ bool Image() {
 		return false;
 	}
 
-	if (!boss_.loadFromFile("Images/boss.png")) {
-		cout << "Could not load boss texture ! " << endl;
-		return false;
-	}
-	else {
-		clips_[0].x = 0;
-		clips_[0].y = 0;
-		clips_[0].w = 206;
-		clips_[0].h = 206;
-
-		clips_[1].x = 206;
-		clips_[1].y = 0;
-		clips_[1].w = 214;
-		clips_[1].h = 214;
-
-		clips_[2].x = 420;
-		clips_[2].y = 0;
-		clips_[2].w = 214;
-		clips_[2].h = 192;
-
-		clips_[3].x = 634;
-		clips_[3].y = 0;
-		clips_[3].w = 177;
-		clips_[3].h = 199;
-
-		clips_[4].x = 811;
-		clips_[4].y = 0;
-		clips_[4].w = 169;
-		clips_[4].h = 206;
-	}
 
 	return true;
 }
@@ -376,7 +370,7 @@ void Round1_display() {
 		else changeBackGround3();
 		Delay_Change_bg++;
 	}
-	else BackGround_Speed -= 2;
+	else BackGround_Speed -= 10;
 }
 
 void Round2_display() {
@@ -407,8 +401,12 @@ void Round2_display() {
 
 	SDL_RenderPresent(renderer);
 
-	if (-BackGround_Speed >= BackGround_width) BackGround_Speed = -BackGround_width;
-	else BackGround_Speed -= 2;
+	if (-BackGround_Speed >= BackGround_width) {
+		if (Delay_Change_bg < 60) BackGround_Speed = -BackGround_width;
+		else changeBackGround4();
+		Delay_Change_bg++;
+	}
+	else BackGround_Speed -= 10;
 }
 
 void changeBackGround1() {
@@ -449,7 +447,7 @@ void changeBackGround3() {
 
 	flag++;
 	a = 255;
-	BackGround_Speed = 0; DelayTime = 100;
+	BackGround_Speed = 0; DelayTime = 100, Delay_Change_bg = 0;
 	e_numb++;
 	round_num++;
 
@@ -460,6 +458,23 @@ void changeBackGround3() {
 		enemy__->setPos_x(i * 200);
 	}
 
+	player_->re_loc();
+}
+
+void changeBackGround4() {
+	while (a > 0) {
+		a -= 5;
+
+		Round3BackGround.render(0, 0);
+		Round2BackGround.setAlphaMod(a);
+		Round2BackGround.render(0, 0);
+		SDL_RenderPresent(renderer);
+	}
+
+	flag++;
+	a = 255;
+	BackGround_Speed = 0; DelayTime = 100;
+	round_num++;
 	player_->re_loc();
 }
 
@@ -480,6 +495,7 @@ void reset() {
 	menu.setAlphaMod(a);
 	control_.setAlphaMod(a);
 	Round1BackGround.setAlphaMod(a);
+	Round2BackGround.setAlphaMod(a);
 
 	SDL_Color menutext2_c = { 0, 0, 0 };
 	menutext2.loadFromText("PLAY AGAIN", "Images/lazy2.ttf", menutext2_c, 70);
@@ -624,12 +640,96 @@ void check_live() {
 	Live_re.render(120, 30);
 }
 
-void bossrender() {
-	SDL_Rect* c_clips = &clips_[frame / 7];
-	boss_.render(900, 250, c_clips);
+void setClipsbg() {
+	for (int i = 0; i < 4; i++) {
+		bg_clips[i].x = i * 1200;
+		bg_clips[i].y = 0;
+		bg_clips[i].w = 1200;
+		bg_clips[i].h = 689;
+	}
 }
 
-void frame__() {
-	frame++;
-	if (frame / 7 >= 5) frame = 0;
+void setbg_motion() {
+	bg_frame++;
+	if (bg_frame / 10 >= 4) bg_frame = 0;
 }
+
+void renderBG() {
+	SDL_Rect* bg_cl = &bg_clips[bg_frame / 10];
+	Round3BackGround.render(0, 0, bg_cl);
+}
+
+void setClipsBoss() {
+	for (int i = 0; i < 12; i++) {
+		boss_clips[i].x = i * 540;
+		boss_clips[i].y = 0;
+		boss_clips[i].w = 540;
+		boss_clips[i].h = 420;
+	}
+}
+
+void setboss_motion() {
+	boss_frame++;
+	if (boss_frame / 5 >= 12) boss_frame = 0;
+}
+
+void renderboss() {
+	SDL_Rect* boss_cl = &boss_clips[boss_frame / 5];
+	boss.render(630, 175, boss_cl);
+}
+
+void fire() {
+	for (int i = 0; i < player_->getBullet_list().size(); i++) {
+		vector<Bullet*> bullet_list = player_->getBullet_list();
+		Bullet* bullet_ = bullet_list.at(i);
+		if (bullet_ != NULL) {
+			if (bullet_->ismove()) {
+				bullet_->move();
+				bullet_->render_b(bullet_);
+			}
+			else {
+				if (bullet_ != NULL) {
+					bullet_list.erase(bullet_list.begin() + i);
+					player_->setb_list(bullet_list);
+
+					delete bullet_;
+					bullet_ = NULL;
+				}
+			}
+		}
+	}
+}
+
+
+void Round3_display() {
+	player_->move(player_);
+	renderBG();
+	while (DelayTime > 0) {
+		Round_.str("");
+		Round_ << "Round " << round_num;
+		SDL_Color Round_Color = { 188, 160, 194 };
+		if (!Roundtext.loadFromText(Round_.str().c_str(), "Images/lazy2.ttf", Round_Color, 150)) {
+			cout << "Could not load Round text ! " << endl;
+		}
+		Roundtext.render(350, 250);
+		SDL_RenderPresent(renderer);
+		DelayTime--;
+	}
+
+	Lives.render(50, 20);
+	player_->render_(player_);
+	fire();
+	renderboss();
+	check_live();
+
+	if (save == 240) {
+		check_l = false;
+		save = 0;
+	}
+
+	SDL_RenderPresent(renderer);
+
+	setbg_motion();
+	setboss_motion();
+}
+
