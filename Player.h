@@ -17,6 +17,8 @@ public:
 	void renderPro_(Player& pro_t ,Player* player_ = NULL);
 	void re_loc();
 
+	void move_portal();
+
 	int getX() { return posX; }
 	int getY() { return posY; }
 

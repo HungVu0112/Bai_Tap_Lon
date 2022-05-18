@@ -6,19 +6,34 @@
 class Enemy : public BackGround {
 private:
 	int posX_e, posY_e;
-	int velX_e;
+	int velX_e, velY_e;
 public:
+	int speed_[3] = { 12, 13, 14 };
+
 	Enemy();
 
 	void setSpeed();
-	void HandleMove_e(const int& x_bor, const int& y_bor);
+	void setSpeed2();
+	void setSpeed3();
+
+	void HandleMove_e();
+	void HandleMove_e2();
+	void HandleMove_e3();
+
 	void setPos_x(int x);
-	void render_e(Enemy* enemy__ = NULL);
+	void setPos_y(int y);
+	void render_e(Enemy* enemy__ = NULL, SDL_Rect* clips = NULL);
+
+	void move_f(int speed, int loc);
+	void setpos_XY_f(int x, int y);
 
 	int getX() { return posX_e; }
 	int getY() { return posY_e; }
 
-	void re_L(const int& x_bor);
+	void re_L();
+	void re_L2();
+	void re_L3();
+
 };
 
 #endif

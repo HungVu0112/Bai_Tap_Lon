@@ -7,7 +7,7 @@ int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 int index = 0;
 int flag = 0;
 int DelayTime = 100;
-int e_numb = 7, live_numb = 10;
+int e_numb = 7, live_numb = 15;
 int save = 0;
 int Delay_Change_bg = 0;
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -18,8 +18,28 @@ TTF_Font* font = NULL;
 bool initSDL();
 bool Image();
 void close();
-//////////////////////////////////////////////////////////////
-BackGround menu, menutext1, menutext2, menutext3, game_over_;
+/////////////////////////////////////////////////////////////////////////////////////////////
+BackGround menu, menutext1, menutext2, menutext3, game_over_, portal_1, portal_2, boss_death;
+// Sand Portal
+SDL_Rect portal1_clips[9];
+int portal1_frame = 0;
+void setportal1Clips();
+void set_portal1_motion();
+void renderportal1();
+// Boss Portal
+SDL_Rect portal2_clips[9];
+int portal2_frame = 0;
+void setportal2Clips();
+void set_portal2_motion();
+void renderportal2();
+// boss death
+int delay_death = 0;
+SDL_Rect boss_death_clips[10];
+int boss_d_frame = 0;
+void setboss_d_clips();
+void set_boss_d_motion();
+void render_boss_death();
+
 Uint8 a = 255;
 int menutext1_X = 100, menutext1_Y = 100;
 int menutext2_X = 150, menutext2_Y = 400;
@@ -42,12 +62,14 @@ int BackGround_Speed = 0, BackGround_width = 6131;
 ///////////////////////////////////////////////////
 Enemy* enemy_ = new Enemy[e_numb];
 void e_show();
-bool checkCollision(Player* player_ = NULL, Enemy* enemy = NULL);
+void e_show2();
+void e_show3();
+bool checkCollision(int x, int y, int w, int h, Player* player_ = NULL, Enemy* enemy = NULL);
 ///////////////////////////////////////////////////////////////////
 stringstream Lives_Remain, Round_;
 int round_num = 1;
 bool check_l = false;
-int lives_r = live_numb, Delay_d = 30, gameover_time_display = 100;
+int lives_r = live_numb, Delay_d = 30, gameover_time_display = 120;
 void control_display();
 void check_live();
 void changeBackGround3();
@@ -64,13 +86,45 @@ SDL_Rect bg_clips[4];
 void setClipsbg();
 void setbg_motion();
 void renderBG();
+
 Enemy boss;
 int boss_frame = 0;
 SDL_Rect boss_clips[12];
 void setClipsBoss();
 void setboss_motion();
 void renderboss();
+
 void fire();
+int boss_health = 200;
+stringstream b_remain;
+bool checkDam = false;
+
+BackGround B_Health;
+void checkb_remain();
+bool checkBulletCollision(Bullet* bullet_);
+
+BackGround GuideText;
+int guide_delay = 60;
+void Guide();
+
+Enemy* boss_fire = new Enemy();
+int boss_fire_frame = 0;
+SDL_Rect boss_fire_clips[9];
+void setBall_Clips();
+void setBoss_fire_motion();
+void renderboss_fire();
+// Tornado
+Enemy* tornado = new Enemy();
+int tornado_frame = 0;
+SDL_Rect tornado_clips[10];
+void setTornado_clips();
+void setTornado_motion();
+void renderTornado();
+
+int check_fire = 0;
+
+BackGround victory;
+int victory_Delay = 120;
 //////////////////////////////////
 // MUSIC // 
 Mix_Music* openMusic = NULL;
@@ -78,6 +132,8 @@ Mix_Chunk* click_s = NULL;
 Mix_Chunk* crash = NULL;
 Mix_Chunk* gameover = NULL;
 ////////////////////////////
+
+// MAIN FUNCTION //
 int main(int argc, char* args[]) {
 	srand(time(0));
 	if (!initSDL()) {
@@ -130,7 +186,7 @@ int main(int argc, char* args[]) {
 	return 0; 
 }
 
-
+// Load Image funtion
 bool Image() {
 	// Music
 	openMusic = Mix_LoadMUS("Sounds/opening.mp3");
@@ -299,10 +355,58 @@ bool Image() {
 		return false;
 	}
 
+	SDL_Color GuideColor = { 188, 160, 194 };
+	if (!GuideText.loadFromText("Press SPACE to shoot ! ", "Images/lazy2.ttf", GuideColor, 90)) {
+		cout << "Could not load text ! " << endl;
+		return false;
+	}
+
+	if (!boss_fire->loadFromFile("Images/boss_fire.png")) {
+		cout << "Could not load boss fire ball texture ! " << endl;
+		return false;
+	}
+	else {
+		setBall_Clips();
+		boss_fire->setpos_XY_f(680, 380);
+	}
+	
+	if (!tornado->loadFromFile("Images/tornado.png")) {
+		cout << "Could not load tornado texture ! " << endl;
+		return false;
+	}
+	else {
+		setTornado_clips();
+		tornado->setpos_XY_f(1600, -150);
+	}
+
+	SDL_Color victory_Color = { 188, 160, 194 };
+	if (!victory.loadFromText("VICTORY", "Images/lazy2.ttf", victory_Color, 150)) {
+		cout << "Could not load victory text ! " << endl;
+		return false;
+	}
+
+	if (!portal_1.loadFromFile("Images/portal.png")) {
+		cout << "Could not load portal texture ! " << endl;
+		return false;
+	}
+	else setportal1Clips();
+
+	if (!portal_2.loadFromFile("Images/portal2.png")) {
+		cout << "Could not load portal texture ! " << endl;
+		return false;
+	}
+	else setportal2Clips();
+
+	if (!boss_death.loadFromFile("Images/explo.png")) {
+		cout << "Could not load explo texture ! " << endl;
+		return false;
+	}
+	else setboss_d_clips();
 
 	return true;
 }
 
+// Render menu and control function
 void menu_display() {
 	if (Mix_PausedMusic() == 1) Mix_PlayMusic(openMusic, 0);
 	if (Mix_PlayingMusic() == 0 ) Mix_PlayMusic(openMusic, 0);
@@ -336,6 +440,7 @@ void control_display() {
 	else index++;
 }
 
+// Render round's gameplay function
 void Round1_display() {
 	player_->move(player_);
 	Round1BackGround.render(BackGround_Speed, 0);
@@ -367,10 +472,21 @@ void Round1_display() {
 
 	if (-BackGround_Speed >= BackGround_width) {
 		if (Delay_Change_bg < 60) BackGround_Speed = -BackGround_width;
-		else changeBackGround3();
+		else {
+			player_->re_loc();
+			while (player_->getX() <= 900){
+				Round1BackGround.render(BackGround_Speed, 0);
+				player_->move_portal();
+				renderportal1();
+				player_->render_(player_);
+				SDL_RenderPresent(renderer);
+				set_portal1_motion();
+			}
+			changeBackGround3();
+		}
 		Delay_Change_bg++;
 	}
-	else BackGround_Speed -= 10;
+	else BackGround_Speed -= 2;
 }
 
 void Round2_display() {
@@ -391,7 +507,7 @@ void Round2_display() {
 
 	Lives.render(50, 20);
 	player_->render_(player_);
-	e_show();
+	e_show2();
 	check_live();
 
 	if (save == 240) {
@@ -403,12 +519,101 @@ void Round2_display() {
 
 	if (-BackGround_Speed >= BackGround_width) {
 		if (Delay_Change_bg < 60) BackGround_Speed = -BackGround_width;
-		else changeBackGround4();
+		else {
+			player_->re_loc();
+			while (player_->getX() <= 900) {
+				Round2BackGround.render(BackGround_Speed, 0);
+				player_->move_portal();
+				renderportal2();
+				player_->render_(player_);
+				SDL_RenderPresent(renderer);
+				set_portal2_motion();
+			}
+			changeBackGround4();
+		}
 		Delay_Change_bg++;
 	}
-	else BackGround_Speed -= 10;
+	else BackGround_Speed -= 2;
 }
 
+void Round3_display() {
+	player_->move(player_);
+	renderBG();
+	while (DelayTime > 0) {
+		Round_.str("");
+		Round_ << "Round " << round_num;
+		SDL_Color Round_Color = { 188, 160, 194 };
+		if (!Roundtext.loadFromText(Round_.str().c_str(), "Images/lazy2.ttf", Round_Color, 150)) {
+			cout << "Could not load Round text ! " << endl;
+		}
+		Roundtext.render(350, 250);
+		SDL_RenderPresent(renderer);
+		DelayTime--;
+	}
+
+	Guide();
+
+	if (boss_health > 0) {
+
+		Lives.render(50, 20);
+		player_->render_(player_);
+		fire();
+
+
+		renderboss();
+
+		if (check_fire == 1) {
+			if (boss_health <= 100) e_show3();
+			if (boss_health <= 50) renderTornado();
+			if (checkCollision(tornado->getX() + 120, tornado->getY(), 443, 1000, player_, NULL)) check_l = true;
+
+			renderboss_fire();
+			if (checkCollision(boss_fire->getX(), boss_fire->getY(), 180, 133, player_, NULL)) check_l = true;
+		}
+
+		checkb_remain();
+	}
+	else {
+		player_->re_loc();
+		if (delay_death < 50) {
+			while (delay_death < 50) {
+				renderBG();
+				player_->render_(player_);
+				render_boss_death();
+				SDL_RenderPresent(renderer);
+				setbg_motion();
+				set_boss_d_motion();
+				delay_death++;
+			}
+		}
+		if (delay_death == 50) {
+			while (victory_Delay > 0) {
+				renderBG();
+				victory.render(250, 300);
+				SDL_RenderPresent(renderer);
+				setbg_motion();
+				victory_Delay--;
+			}
+		}
+		reset();
+	}
+
+	check_live();
+
+	if (save == 240) {
+		check_l = false;
+		save = 0;
+	}
+
+	SDL_RenderPresent(renderer);
+
+	setbg_motion();
+	setboss_motion();
+	setBoss_fire_motion();
+	setTornado_motion();
+}
+
+// Change background function
 void changeBackGround1() {
 	while (a > 0) {
 		a -= 5;
@@ -455,7 +660,7 @@ void changeBackGround3() {
 	for (int i = 0; i < e_numb; i++) {
 		Enemy* enemy__ = (enemy_ + i);
 		enemy__->loadFromFile("Images/sand_spike.png");
-		enemy__->setPos_x(i * 200);
+		enemy__->setPos_y(i * 200);
 	}
 
 	player_->re_loc();
@@ -475,9 +680,19 @@ void changeBackGround4() {
 	a = 255;
 	BackGround_Speed = 0; DelayTime = 100;
 	round_num++;
+	e_numb = 3;
+
+	enemy_ = new Enemy[e_numb];
+	for (int i = 0; i < e_numb; i++) {
+		Enemy* enemy__ = (enemy_ + i);
+		enemy__->loadFromFile("Images/boss_spike.png");
+		enemy__->setPos_y(i * 200);
+	}
+
 	player_->re_loc();
 }
 
+// Reset function
 void reset() {
 	flag = 0;
 	lives_r = live_numb;
@@ -485,8 +700,14 @@ void reset() {
 	BackGround_Speed = 0;
 	round_num = 1;
 	e_numb = 7;
-	gameover_time_display = 100;
+	gameover_time_display = 120;
 	Delay_Change_bg = 0;
+	guide_delay = 60;
+	victory_Delay = 120;
+	boss_health = 200;
+	save = 0;
+	check_fire = 0;
+	delay_death = 0;
 
 	checkChangeMenu = false;
 	checkClicked = false;
@@ -510,35 +731,85 @@ void reset() {
 	player_->re_loc();
 }
 
+// Render spike function
 void e_show() {
 	for (int i = 0; i < e_numb; i++) {
 		Enemy* enemy__ = (enemy_ + i);
 		if (enemy__ != NULL) {
-			enemy__->HandleMove_e(screen_width, screen_height);
+			enemy__->HandleMove_e();
 			enemy__->render_e(enemy__);
 			if (BackGround_Speed == -BackGround_width) {
 				if (enemy__->getX() < -200)
 					enemy__->free();
 			}
-			else if (checkCollision(player_, enemy__)) {
+			else if (checkCollision(0, 0, 0, 0, player_, enemy__)) {
 				if (save == 0 && lives_r > 1) Mix_PlayChannel(-1, crash, 0);
 				check_l = true;
-				enemy__->re_L(screen_width);
+				enemy__->re_L();
 			}
 		}
 	}
 }
 
-bool checkCollision(Player* player_, Enemy* enemy_) {
+void e_show2() {
+	for (int i = 0; i < e_numb; i++) {
+		Enemy* enemy__ = (enemy_ + i);
+		if (enemy__ != NULL) {
+			enemy__->HandleMove_e2();
+			enemy__->render_e(enemy__);
+			if (BackGround_Speed == -BackGround_width) {
+				if (enemy__->getY() > (screen_height + 300))
+					enemy__->free();
+			}
+			else if (checkCollision(0, 0, 0, 0, player_, enemy__)) {
+				if (save == 0 && lives_r > 1) Mix_PlayChannel(-1, crash, 0);
+				check_l = true;
+				enemy__->re_L2();
+			}
+		}
+	}
+}
+
+void e_show3() {
+	for (int i = 0; i < e_numb; i++) {
+		Enemy* enemy__ = (enemy_ + i);
+		if (enemy__ != NULL) {
+			enemy__->HandleMove_e3();
+			enemy__->render_e(enemy__);
+			if (BackGround_Speed == -BackGround_width) {
+				if (enemy__->getY() > (screen_height + 1000))
+					enemy__->free();
+			}
+			else if (checkCollision(0, 0, 0, 0, player_, enemy__)) {
+				if (save == 0 && lives_r > 1) Mix_PlayChannel(-1, crash, 0);
+				check_l = true;
+				enemy__->re_L3();
+			}
+		}
+	}
+}
+
+// Check collision function
+bool checkCollision(int x, int y, int w, int h, Player* player_, Enemy* enemy_) {
 	int left_a = player_->getX();
 	int right_a = player_->getX() + player_->getWidth();
 	int top_a = player_->getY();
 	int bottom_a = player_->getY() + player_->getHeight();
 
-	int left_b = enemy_->getX();
-	int right_b = enemy_->getX() + enemy_->getWidth();
-	int top_b = enemy_->getY();
-	int bottom_b = enemy_->getY() + enemy_->getHeight();
+	int left_b, right_b, top_b, bottom_b;
+
+	if (enemy_ != NULL) {
+		 left_b = enemy_->getX();
+		 right_b = enemy_->getX() + enemy_->getWidth();
+		 top_b = enemy_->getY();
+		 bottom_b = enemy_->getY() + enemy_->getHeight();
+	}
+	else {
+		left_b = x;
+		right_b = x + w;
+		top_b = y;
+		bottom_b = y + h;
+	}
 
 	if (left_a > left_b && left_a < right_b)
 	{
@@ -612,6 +883,90 @@ bool checkCollision(Player* player_, Enemy* enemy_) {
 	return false;
 }
 
+bool checkBulletCollision(Bullet* bullet_) {
+	int left_a = bullet_->getX_b();
+	int right_a = bullet_->getX_b() + bullet_->getWidth();
+	int top_a = bullet_->getY_b();
+	int bottom_a = bullet_->getY_b() + bullet_->getHeight();
+
+	int left_b = 900;
+	int right_b = 900 + 100;
+	int top_b = 400;
+	int bottom_b = 400 + 100;
+
+	if (left_a > left_b && left_a < right_b)
+	{
+		if (top_a > top_b && top_a < bottom_b)
+		{
+			return true;
+		}
+	}
+
+	if (left_a > left_b && left_a < right_b)
+	{
+		if (bottom_a > top_b && bottom_a < bottom_b)
+		{
+			return true;
+		}
+	}
+
+	if (right_a > left_b && right_a < right_b)
+	{
+		if (top_a > top_b && top_a < bottom_b)
+		{
+			return true;
+		}
+	}
+
+	if (right_a > left_b && right_a < right_b)
+	{
+		if (bottom_a > top_b && bottom_a < bottom_b)
+		{
+			return true;
+		}
+	}
+
+	if (left_b > left_a && left_b < right_a)
+	{
+		if (top_b > top_a && top_b < bottom_a)
+		{
+			return true;
+		}
+	}
+
+	if (left_b > left_a && left_b < right_a)
+	{
+		if (bottom_b > top_a && bottom_b < bottom_a)
+		{
+			return true;
+		}
+	}
+
+	if (right_b > left_a && right_b < right_a)
+	{
+		if (top_b > top_a && top_b < bottom_a)
+		{
+			return true;
+		}
+	}
+
+	if (right_b > left_a && right_b < right_a)
+	{
+		if (bottom_b > top_a && bottom_b < bottom_a)
+		{
+			return true;
+		}
+	}
+
+	if (top_a == top_b && right_a == right_b && bottom_a == bottom_b)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+// Check live function
 void check_live() {
 	if (check_l) {
 		if (save == 0) lives_r--;
@@ -640,6 +995,67 @@ void check_live() {
 	Live_re.render(120, 30);
 }
 
+// Render boss death's scene function
+void setboss_d_clips() {
+	for (int i = 0; i < 10; i++) {
+		boss_death_clips[i].x = i * 256;
+		boss_death_clips[i].y = 0;
+		boss_death_clips[i].w = 256;
+		boss_death_clips[i].h = 280;
+	}
+}
+
+void set_boss_d_motion() {
+	boss_d_frame++;
+	if (boss_d_frame / 5 >= 10) boss_d_frame = 0;
+}
+
+void render_boss_death() {
+	SDL_Rect* boss_death_cl = &boss_death_clips[boss_d_frame / 5];
+	boss_death.render(780, 340, boss_death_cl);
+}
+
+// Render sand portal function
+void setportal1Clips() {
+	for (int i = 0; i < 9; i++) {
+		portal1_clips[i].x = i * 498;
+		portal1_clips[i].y = 0;
+		portal1_clips[i].w = 498;
+		portal1_clips[i].h = 498;
+	}
+}
+
+void set_portal1_motion() {
+	portal1_frame++;
+	if (portal1_frame / 4 >= 9) portal1_frame = 0;
+}
+
+void renderportal1() {
+	SDL_Rect* portal_cl = &portal1_clips[portal1_frame / 4];
+	portal_1.render(680, 90, portal_cl);
+}
+
+// Render boss portal function
+void setportal2Clips() {
+	for (int i = 0; i < 9; i++) {
+		portal2_clips[i].x = i * 498;
+		portal2_clips[i].y = 0;
+		portal2_clips[i].w = 498;
+		portal2_clips[i].h = 498;
+	}
+}
+
+void set_portal2_motion() {
+	portal2_frame++;
+	if (portal2_frame / 4 >= 9) portal2_frame = 0;
+}
+
+void renderportal2() {
+	SDL_Rect* portal_cl_ = &portal2_clips[portal2_frame / 4];
+	portal_2.render(680, 90, portal_cl_);
+}
+
+// Render final round background function
 void setClipsbg() {
 	for (int i = 0; i < 4; i++) {
 		bg_clips[i].x = i * 1200;
@@ -659,6 +1075,7 @@ void renderBG() {
 	Round3BackGround.render(0, 0, bg_cl);
 }
 
+// Render boss function
 void setClipsBoss() {
 	for (int i = 0; i < 12; i++) {
 		boss_clips[i].x = i * 540;
@@ -678,6 +1095,49 @@ void renderboss() {
 	boss.render(630, 175, boss_cl);
 }
 
+// Render fire ball function
+void setBall_Clips() {
+	for (int i = 0; i < 9; i++) {
+		boss_fire_clips[i].x = i * 200;
+		boss_fire_clips[i].y = 0;
+		boss_fire_clips[i].w = 200;
+		boss_fire_clips[i].h = 133;
+ 	}
+}
+
+void setBoss_fire_motion() {
+	boss_fire_frame++;
+	if (boss_fire_frame / 4 >= 9) boss_fire_frame = 0;
+}
+
+void renderboss_fire() {
+	SDL_Rect* ball_cl = &boss_fire_clips[boss_fire_frame / 4];
+	boss_fire->move_f(15, 680);
+	boss_fire->render_e(boss_fire, ball_cl);
+}
+
+// Render fireball function
+void setTornado_clips() {
+	for (int i = 0; i < 10; i++) {
+		tornado_clips[i].x = i * 443;
+		tornado_clips[i].y = 0;
+		tornado_clips[i].w = 443;
+		tornado_clips[i].h = 1000;
+	}
+}
+
+void setTornado_motion() {
+	tornado_frame++;
+	if (tornado_frame / 4 >= 10) tornado_frame = 0;
+}
+
+void renderTornado() {
+	SDL_Rect* tornado_cl = &tornado_clips[tornado_frame / 4];
+	tornado->move_f(5, 1600);
+	tornado->render_e(tornado, tornado_cl);
+}
+
+// Launch bullet & guide and check boss's health remaining function
 void fire() {
 	for (int i = 0; i < player_->getBullet_list().size(); i++) {
 		vector<Bullet*> bullet_list = player_->getBullet_list();
@@ -686,6 +1146,15 @@ void fire() {
 			if (bullet_->ismove()) {
 				bullet_->move();
 				bullet_->render_b(bullet_);
+				if (checkBulletCollision(bullet_)) {
+					check_fire = 1;
+					checkDam = true;
+					bullet_list.erase(bullet_list.begin() + i);
+					player_->setb_list(bullet_list);
+
+					delete bullet_;
+					bullet_ = NULL;
+				}
 			}
 			else {
 				if (bullet_ != NULL) {
@@ -700,36 +1169,24 @@ void fire() {
 	}
 }
 
-
-void Round3_display() {
-	player_->move(player_);
-	renderBG();
-	while (DelayTime > 0) {
-		Round_.str("");
-		Round_ << "Round " << round_num;
-		SDL_Color Round_Color = { 188, 160, 194 };
-		if (!Roundtext.loadFromText(Round_.str().c_str(), "Images/lazy2.ttf", Round_Color, 150)) {
-			cout << "Could not load Round text ! " << endl;
-		}
-		Roundtext.render(350, 250);
-		SDL_RenderPresent(renderer);
-		DelayTime--;
+void checkb_remain() {
+	if (checkDam) {
+		boss_health--;
+		checkDam = false;
 	}
-
-	Lives.render(50, 20);
-	player_->render_(player_);
-	fire();
-	renderboss();
-	check_live();
-
-	if (save == 240) {
-		check_l = false;
-		save = 0;
+	b_remain.str("");
+	b_remain << boss_health;
+	SDL_Color B_Health_Color = { 235, 51, 36 };
+	if (!B_Health.loadFromText(b_remain.str().c_str(), "Images/lazy2.ttf", B_Health_Color, 30)) {
+		cout << "Could not load Health text ! " << endl;
 	}
-
-	SDL_RenderPresent(renderer);
-
-	setbg_motion();
-	setboss_motion();
+	B_Health.render(900, 200);
 }
 
+void Guide() {
+	while (guide_delay > 0) {
+		GuideText.render(130, 450);
+		SDL_RenderPresent(renderer);
+		guide_delay--;
+	}
+}

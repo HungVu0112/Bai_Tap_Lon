@@ -11,8 +11,8 @@ Bullet::Bullet(int x, int y) {
 
 void Bullet::move() {
 	posX_b += velX_b;
-
-	if (posX_b > screen_width) {
+	// 900 400 1000 500
+	if ((posX_b > screen_width) || (posX_b >= 900 && 300 <= posY_b && posY_b < 400) || (posX_b >= 900 && 500 < posY_b && posY_b <= 600)) {
 		ismoved_ = false;
 	}
 }

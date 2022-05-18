@@ -61,3 +61,7 @@ void Player::re_loc() {
 	posX = 15;
 	posY = screen_height / 2;
 }
+
+void Player::move_portal() {
+	posX += 5;
+}
