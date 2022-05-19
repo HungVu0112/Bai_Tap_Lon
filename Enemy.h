@@ -24,7 +24,7 @@ public:
 	void setPos_y(int y);
 	void render_e(Enemy* enemy__ = NULL, SDL_Rect* clips = NULL);
 
-	void move_f(int speed, int loc);
+	void move_f(int speed, int loc, Mix_Chunk* sound = NULL);
 	void setpos_XY_f(int x, int y);
 
 	int getX() { return posX_e; }

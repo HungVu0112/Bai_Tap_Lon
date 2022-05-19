@@ -79,7 +79,7 @@ void BackGround::render(int x, int y, SDL_Rect* clips) {
 	SDL_RenderCopy(renderer, texture, clips, &renderQuad);
 }
 
-void BackGround::handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed, Mix_Chunk* click_s) {
+void BackGround::handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed,int& flag, Mix_Chunk* click_s) {
 	if (e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
 		int x, y;
 		SDL_GetMouseState(&x, &y);
@@ -114,6 +114,9 @@ void BackGround::handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_
 				posX -= 3;
 				posY += 3;
 				if (Mix_PlayingMusic() == 1) Mix_PauseMusic();
+				if (flag == 1) {
+					if (Mix_PlayingMusic() == 1) Mix_HaltMusic();
+				}
 				Mix_PlayChannel(-1, click_s, 0);
 				checkPlayed = true;
 				break;

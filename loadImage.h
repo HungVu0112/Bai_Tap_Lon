@@ -34,7 +34,7 @@ public:
 
 	void render(int x, int y, SDL_Rect* clips = NULL);
 
-	void handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed, Mix_Chunk* click_s = NULL);
+	void handleEvent(SDL_Event& e, int posX, int posY, BackGround& text_, bool& checkPlayed, int& flag, Mix_Chunk* click_s = NULL);
 	void setBlendMode(SDL_BlendMode blending);
 	void setAlphaMod(Uint8 alpha);
 

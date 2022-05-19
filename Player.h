@@ -11,7 +11,7 @@ public:
 
 	Player();
 
-	void handleMove(SDL_Event& e, Player* player_);
+	void handleMove(SDL_Event& e, Player* player_, Mix_Chunk* bullet_s = NULL);
 	void move(Player* player_ = NULL);
 	void render_(Player* player_ = NULL);
 	void renderPro_(Player& pro_t ,Player* player_ = NULL);

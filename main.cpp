@@ -6,10 +6,6 @@
 int Delay[MAX] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -3 };
 int index = 0;
 int flag = 0;
-int DelayTime = 100;
-int e_numb = 7, live_numb = 15;
-int save = 0;
-int Delay_Change_bg = 0;
 ////////////////////////////////////////////////////////////////////////////////////////
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -18,28 +14,9 @@ TTF_Font* font = NULL;
 bool initSDL();
 bool Image();
 void close();
-/////////////////////////////////////////////////////////////////////////////////////////////
-BackGround menu, menutext1, menutext2, menutext3, game_over_, portal_1, portal_2, boss_death;
-// Sand Portal
-SDL_Rect portal1_clips[9];
-int portal1_frame = 0;
-void setportal1Clips();
-void set_portal1_motion();
-void renderportal1();
-// Boss Portal
-SDL_Rect portal2_clips[9];
-int portal2_frame = 0;
-void setportal2Clips();
-void set_portal2_motion();
-void renderportal2();
-// boss death
-int delay_death = 0;
-SDL_Rect boss_death_clips[10];
-int boss_d_frame = 0;
-void setboss_d_clips();
-void set_boss_d_motion();
-void render_boss_death();
-
+/////////////////////////////////////////////////////////////
+// Menu function // 
+BackGround menu, menutext1, menutext2, menutext3,boss_death;
 Uint8 a = 255;
 int menutext1_X = 100, menutext1_Y = 100;
 int menutext2_X = 150, menutext2_Y = 400;
@@ -47,46 +24,116 @@ int menutext3_X = 150, menutext3_Y = 500;
 bool checkChangeMenu = false;
 bool check_quit = false;
 void changeBackGround1();
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-BackGround control_, controltext, livestext, control, heart, dots, changePoint, Roundtext, Live_re, pro_sign, Round1BackGround, Round2BackGround, Round3BackGround;
+void menu_display();
+////////////////////////////////////////////////////////////////////////////////
+// Control function // 
+BackGround control_, controltext, livestext, control, heart, dots, changePoint;
 int controltext_X = 190, controltext_Y = 200;
 int livestext_X = 750, livestext_Y = 200;
 int changepoint_X = 1100, changepoint_Y = 630;
 bool checkClicked = false;
 void changeBackGround2();
-/////////////////////////////////
-Player* player_ = new Player();
-BackGround Lives;
-Player pro_t;
+void control_display();
+////////////////////////////////////////////////////////////////////////////////////
+// Round function // 
+BackGround  Round1BackGround, Round2BackGround, Round3BackGround, Lives, Roundtext;
 int BackGround_Speed = 0, BackGround_width = 6131;
-///////////////////////////////////////////////////
-Enemy* enemy_ = new Enemy[e_numb];
-void e_show();
-void e_show2();
-void e_show3();
-bool checkCollision(int x, int y, int w, int h, Player* player_ = NULL, Enemy* enemy = NULL);
-///////////////////////////////////////////////////////////////////
 stringstream Lives_Remain, Round_;
 int round_num = 1;
 bool check_l = false;
-int lives_r = live_numb, Delay_d = 30, gameover_time_display = 120;
-void control_display();
-void check_live();
-void changeBackGround3();
-////////////////////////////////////////////////////////////////////
-void menu_display();
+int DelayTime = 100;
+int Delay_Change_bg = 0;
+
+// Round 
 void Round1_display();
 void Round2_display();
 void Round3_display();
-void reset();
+
+// Check live 
+void check_live();
+int save = 0;
+
+// Change background
+void changeBackGround3();
 void changeBackGround4();
-//////////////////////////
+
+// Final round function 
 int bg_frame = 0;
+int delay_roar = 0;
 SDL_Rect bg_clips[4];
 void setClipsbg();
 void setbg_motion();
 void renderBG();
 
+// Boss health remain 
+int boss_health = 200;
+stringstream b_remain;
+bool checkDam = false;
+BackGround B_Health;
+void checkb_remain();
+
+// Guide
+BackGround GuideText;
+int guide_delay = 60;
+void Guide();
+///////////////////////////////
+// boss death // 
+int delay_death = 0;
+SDL_Rect boss_death_clips[10];
+int boss_d_frame = 0;
+void setboss_d_clips();
+void set_boss_d_motion();
+void render_boss_death();
+////////////////////////////////
+// Portal function // 
+BackGround  portal_1, portal_2;
+
+// Sand Portal
+SDL_Rect portal1_clips[9];
+int portal1_frame = 0;
+void setportal1Clips();
+void set_portal1_motion();
+void renderportal1();
+
+// Boss Portal
+SDL_Rect portal2_clips[9];
+int portal2_frame = 0;
+void setportal2Clips();
+void set_portal2_motion();
+void renderportal2();
+//////////////////////////
+// Shield function // 
+BackGround  pro_sign;
+Player pro_t;
+/////////////////////////////////
+// Gameover function // 
+BackGround game_over_;
+int gameover_time_display = 120;
+/////////////////////////////////
+// Victory function //
+BackGround victory;
+int victory_Delay = 120;
+/////////////////////////
+// Reset function // 
+void reset();
+/////////////////////
+// Live function //
+BackGround Live_re;
+////////////////////////////////
+// Player function // 
+Player* player_ = new Player();
+void fire();
+int live_numb = 10;
+int lives_r = live_numb;
+int check_fire = 0;
+///////////////////////////////////
+// Enemy function //
+int e_numb = 7;
+Enemy* enemy_ = new Enemy[e_numb];
+void e_show();
+void e_show2();
+void e_show3();
+// Boss
 Enemy boss;
 int boss_frame = 0;
 SDL_Rect boss_clips[12];
@@ -94,25 +141,14 @@ void setClipsBoss();
 void setboss_motion();
 void renderboss();
 
-void fire();
-int boss_health = 200;
-stringstream b_remain;
-bool checkDam = false;
-
-BackGround B_Health;
-void checkb_remain();
-bool checkBulletCollision(Bullet* bullet_);
-
-BackGround GuideText;
-int guide_delay = 60;
-void Guide();
-
+// Boss Fire ball
 Enemy* boss_fire = new Enemy();
 int boss_fire_frame = 0;
 SDL_Rect boss_fire_clips[9];
 void setBall_Clips();
 void setBoss_fire_motion();
 void renderboss_fire();
+
 // Tornado
 Enemy* tornado = new Enemy();
 int tornado_frame = 0;
@@ -120,19 +156,27 @@ SDL_Rect tornado_clips[10];
 void setTornado_clips();
 void setTornado_motion();
 void renderTornado();
-
-int check_fire = 0;
-
-BackGround victory;
-int victory_Delay = 120;
-//////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Check Collision // 
+bool checkCollision(int x, int y, int w, int h, Player* player_ = NULL, Enemy* enemy = NULL);
+bool checkBulletCollision(Bullet* bullet_);
+/////////////////////////////
 // MUSIC // 
-Mix_Music* openMusic = NULL;
+Mix_Music* openingMusic = NULL;
+Mix_Music* Round1Music = NULL;
+Mix_Music* Round2Music = NULL;
+Mix_Music* Round3Music = NULL;
+Mix_Chunk* dragon_r = NULL;
+Mix_Chunk* dragon_d = NULL;
+Mix_Chunk* victory_s = NULL;
+Mix_Chunk* tornado_s = NULL;
+Mix_Chunk* portal_s = NULL;
+Mix_Chunk* bullet_s = NULL;
+Mix_Chunk* fireball_s = NULL;
 Mix_Chunk* click_s = NULL;
 Mix_Chunk* crash = NULL;
 Mix_Chunk* gameover = NULL;
 ////////////////////////////
-
 // MAIN FUNCTION //
 int main(int argc, char* args[]) {
 	srand(time(0));
@@ -149,11 +193,11 @@ int main(int argc, char* args[]) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) quit = true;
 				if (flag == 0) {
-					menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu, click_s);
-					menutext3.handleEvent(e, menutext3_X, menutext3_Y, menutext3, check_quit, click_s);
+					menutext2.handleEvent(e, menutext2_X, menutext2_Y, menutext2, checkChangeMenu, flag, click_s);
+					menutext3.handleEvent(e, menutext3_X, menutext3_Y, menutext3, check_quit, flag, click_s);
 				}
-				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked, click_s);
-				player_->handleMove(e, player_);
+				if (flag == 1) changePoint.handleEvent(e, changepoint_X, changepoint_Y, changePoint, checkClicked, flag, click_s);
+				player_->handleMove(e, player_, bullet_s);
 			}
 
 			SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
@@ -189,9 +233,69 @@ int main(int argc, char* args[]) {
 // Load Image funtion
 bool Image() {
 	// Music
-	openMusic = Mix_LoadMUS("Sounds/opening.mp3");
-	if (openMusic == NULL) {
+	openingMusic = Mix_LoadMUS("Sounds/opening.mp3");
+	if (openingMusic == NULL) {
 		cout << "Could not load opening music ! " << endl;
+		return false;
+	}
+
+	Round1Music = Mix_LoadMUS("Sounds/Round1_s.mp3");
+	if (Round1Music == NULL) {
+		cout << "Could not load round 1 music ! " << endl;
+		return false;
+	}
+
+	Round2Music = Mix_LoadMUS("Sounds/Round2_s.mp3");
+	if (Round2Music == NULL) {
+		cout << "Could not load round 2 music ! " << endl;
+		return false;
+	}
+
+	Round3Music = Mix_LoadMUS("Sounds/BossRound_s.mp3");
+	if (Round3Music == NULL) {
+		cout << "Could not load round 3 music ! " << endl;
+		return false;
+	}
+
+	dragon_d = Mix_LoadWAV("Sounds/dragon_d.wav");
+	if (dragon_d == NULL) {
+		cout << "Could not load dragon death sound ! " << endl;
+		return false;
+	}
+
+	dragon_r = Mix_LoadWAV("Sounds/dragon_r.wav");
+	if (dragon_r == NULL) {
+		cout << "Could not load dragon roar ! " << endl;
+		return false;
+	}
+
+	victory_s = Mix_LoadWAV("Sounds/victory.wav");
+	if (victory_s == NULL) {
+		cout << "Could not load victory sound ! " << endl;
+		return false;
+	}
+
+	tornado_s = Mix_LoadWAV("Sounds/storm.wav");
+	if (tornado_s == NULL) {
+		cout << "Could not load tornado sound ! " << endl;
+		return false;
+	}
+
+	portal_s = Mix_LoadWAV("Sounds/portal.wav");
+	if (portal_s == NULL) {
+		cout << "Could not load portal sound ! " << endl;
+		return false;
+	}
+
+	bullet_s = Mix_LoadWAV("Sounds/bullet_s.wav");
+	if (bullet_s == NULL) {
+		cout << "Could not load bullet sound ! " << endl;
+		return false;
+	}
+
+	fireball_s = Mix_LoadWAV("Sounds/fireball_s.wav");
+	if (fireball_s == NULL) {
+		cout << "Could not load fire ball sound ! " << endl;
 		return false;
 	}
 
@@ -408,8 +512,7 @@ bool Image() {
 
 // Render menu and control function
 void menu_display() {
-	if (Mix_PausedMusic() == 1) Mix_PlayMusic(openMusic, 0);
-	if (Mix_PlayingMusic() == 0 ) Mix_PlayMusic(openMusic, 0);
+	if (Mix_PlayingMusic() == 0 ) Mix_PlayMusic(openingMusic, 0);
 	menu.render(0, 0);
 	menutext1.render(menutext1_X, menutext1_Y);
 	menutext2.render(menutext2_X, menutext2_Y);
@@ -457,6 +560,8 @@ void Round1_display() {
 		DelayTime--;
 	}
 
+	if (Mix_PlayingMusic() == 0) Mix_PlayMusic(Round1Music, 0);
+
 	Lives.render(50, 20);
 	player_->render_(player_);
 	
@@ -473,7 +578,9 @@ void Round1_display() {
 	if (-BackGround_Speed >= BackGround_width) {
 		if (Delay_Change_bg < 60) BackGround_Speed = -BackGround_width;
 		else {
+			if (Mix_PlayingMusic() == 1) Mix_HaltMusic();
 			player_->re_loc();
+			Mix_PlayChannel(-1, portal_s, 0);
 			while (player_->getX() <= 900){
 				Round1BackGround.render(BackGround_Speed, 0);
 				player_->move_portal();
@@ -482,11 +589,12 @@ void Round1_display() {
 				SDL_RenderPresent(renderer);
 				set_portal1_motion();
 			}
+			Mix_HaltChannel(-1);
 			changeBackGround3();
 		}
 		Delay_Change_bg++;
 	}
-	else BackGround_Speed -= 2;
+	else BackGround_Speed -= 3;
 }
 
 void Round2_display() {
@@ -504,6 +612,7 @@ void Round2_display() {
 		SDL_RenderPresent(renderer);
 		DelayTime--;
 	}
+	if (Mix_PlayingMusic() == 0) Mix_PlayMusic(Round2Music, 0);
 
 	Lives.render(50, 20);
 	player_->render_(player_);
@@ -520,7 +629,9 @@ void Round2_display() {
 	if (-BackGround_Speed >= BackGround_width) {
 		if (Delay_Change_bg < 60) BackGround_Speed = -BackGround_width;
 		else {
+			if (Mix_PlayingMusic() == 1) Mix_HaltMusic();
 			player_->re_loc();
+			Mix_PlayChannel(-1, portal_s, 0);
 			while (player_->getX() <= 900) {
 				Round2BackGround.render(BackGround_Speed, 0);
 				player_->move_portal();
@@ -529,11 +640,12 @@ void Round2_display() {
 				SDL_RenderPresent(renderer);
 				set_portal2_motion();
 			}
+			Mix_HaltChannel(-1);
 			changeBackGround4();
 		}
 		Delay_Change_bg++;
 	}
-	else BackGround_Speed -= 2;
+	else BackGround_Speed -= 3;
 }
 
 void Round3_display() {
@@ -553,29 +665,46 @@ void Round3_display() {
 
 	Guide();
 
+	if (Mix_PlayingMusic() == 0) Mix_PlayMusic(Round3Music, 0);
+
 	if (boss_health > 0) {
+
+		if(delay_roar == 0) Mix_PlayChannel(-1, dragon_r, 0);
 
 		Lives.render(50, 20);
 		player_->render_(player_);
-		fire();
-
-
 		renderboss();
+		fire();
 
 		if (check_fire == 1) {
 			if (boss_health <= 100) e_show3();
 			if (boss_health <= 50) renderTornado();
-			if (checkCollision(tornado->getX() + 120, tornado->getY(), 443, 1000, player_, NULL)) check_l = true;
+			if (checkCollision(tornado->getX() + 120, tornado->getY(), 443, 1000, player_, NULL)) {
+				if (save == 0) Mix_PlayChannel(-1, crash, 0);
+				check_l = true;
+			}
 
 			renderboss_fire();
-			if (checkCollision(boss_fire->getX(), boss_fire->getY(), 180, 133, player_, NULL)) check_l = true;
+			if (checkCollision(boss_fire->getX(), boss_fire->getY(), 180, 133, player_, NULL)) {
+				if (save == 0) Mix_PlayChannel(-1, crash, 0);
+				check_l = true;
+			}
+		}
+		check_live();
+
+		if (save == 240) {
+			check_l = false;
+			save = 0;
 		}
 
 		checkb_remain();
 	}
 	else {
+		if (Mix_PlayingMusic() == 1) Mix_HaltMusic();
+		Mix_HaltChannel(-1);
 		player_->re_loc();
 		if (delay_death < 50) {
+			Mix_PlayChannel(-1, dragon_d, 0);
 			while (delay_death < 50) {
 				renderBG();
 				player_->render_(player_);
@@ -587,6 +716,7 @@ void Round3_display() {
 			}
 		}
 		if (delay_death == 50) {
+			Mix_PlayChannel(-1, victory_s, 0);
 			while (victory_Delay > 0) {
 				renderBG();
 				victory.render(250, 300);
@@ -595,18 +725,13 @@ void Round3_display() {
 				victory_Delay--;
 			}
 		}
+		Mix_HaltChannel(-1);
 		reset();
-	}
-
-	check_live();
-
-	if (save == 240) {
-		check_l = false;
-		save = 0;
 	}
 
 	SDL_RenderPresent(renderer);
 
+	delay_roar = 1;
 	setbg_motion();
 	setboss_motion();
 	setBoss_fire_motion();
@@ -708,6 +833,7 @@ void reset() {
 	save = 0;
 	check_fire = 0;
 	delay_death = 0;
+	delay_roar = 0;
 
 	checkChangeMenu = false;
 	checkClicked = false;
@@ -889,8 +1015,8 @@ bool checkBulletCollision(Bullet* bullet_) {
 	int top_a = bullet_->getY_b();
 	int bottom_a = bullet_->getY_b() + bullet_->getHeight();
 
-	int left_b = 900;
-	int right_b = 900 + 100;
+	int left_b = 800;
+	int right_b = 800 + 100;
 	int top_b = 400;
 	int bottom_b = 400 + 100;
 
@@ -976,6 +1102,7 @@ void check_live() {
 	}
 
 	if (lives_r == 0) {
+		if (Mix_PlayingMusic() == 1) Mix_HaltMusic();
 		Mix_PlayChannel(-1, gameover, 0);
 		while (gameover_time_display > 0) {
 			game_over_.render(250, 250);
@@ -1112,7 +1239,7 @@ void setBoss_fire_motion() {
 
 void renderboss_fire() {
 	SDL_Rect* ball_cl = &boss_fire_clips[boss_fire_frame / 4];
-	boss_fire->move_f(15, 680);
+	boss_fire->move_f(15, 680, fireball_s);
 	boss_fire->render_e(boss_fire, ball_cl);
 }
 
@@ -1133,7 +1260,7 @@ void setTornado_motion() {
 
 void renderTornado() {
 	SDL_Rect* tornado_cl = &tornado_clips[tornado_frame / 4];
-	tornado->move_f(5, 1600);
+	tornado->move_f(5, 1600, tornado_s);
 	tornado->render_e(tornado, tornado_cl);
 }
 

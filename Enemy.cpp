@@ -64,7 +64,9 @@ void Enemy::setPos_y(int y) {
 	posY_e += y;
 }
 
-void Enemy::move_f(int speed, int loc) {
+void Enemy::move_f(int speed, int loc, Mix_Chunk* sound) {
+	if (posX_e == loc) Mix_PlayChannel(-1, sound, 0);
+	
 	posX_e -= speed;
 
 	if (posX_e < -300) {

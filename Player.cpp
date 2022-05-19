@@ -8,7 +8,7 @@ Player::Player() {
 	velY = 0;
 }
 
-void Player::handleMove(SDL_Event& e, Player* player_) {
+void Player::handleMove(SDL_Event& e, Player* player_, Mix_Chunk* bullet_s) {
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
 		case SDLK_UP: velY -= player_vel; break;
@@ -27,6 +27,7 @@ void Player::handleMove(SDL_Event& e, Player* player_) {
 	}
 	
 	if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE && e.key.repeat == 0) {
+		Mix_PlayChannel(-1, bullet_s, 0);
 		Bullet* new_bullet = new Bullet(player_->getX() + player_->getWidth(), player_->getY());
 		new_bullet->loadFromFile("Images/bullet.png");
 		new_bullet->setmove(true);
